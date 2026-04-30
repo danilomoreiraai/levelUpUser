@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-brand: #007aff;
+    --color-surface: #ffffff;
+    --color-surface-subtle: #f5f9ff;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-surface-subtle text-slate-900 font-sans antialiased;
+    margin: 0;
+    min-height: 100dvh;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-white;
+  }
+}
