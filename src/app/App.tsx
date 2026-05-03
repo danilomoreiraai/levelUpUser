@@ -1,7 +1,23 @@
+import * as Sentry from "@sentry/react";
 import { Route, Routes } from "react-router-dom";
 
 import { HomePage } from "@/pages/HomePage";
 import { routes } from "@/routes/routes";
+
+function ProductionErrorFallback() {
+  return (
+    <main className="min-h-dvh grid place-items-center px-6 bg-surface">
+      <section className="max-w-sm text-center">
+        <h1 className="text-2xl font-semibold text-slate-900">
+          Something went wrong
+        </h1>
+        <p className="mt-3 text-sm text-slate-500">
+          The error was reported automatically. Please refresh the page.
+        </p>
+      </section>
+    </main>
+  );
+}
 
 /**
  * App shell. Wires the router; pages own their own layout.
@@ -10,16 +26,18 @@ import { routes } from "@/routes/routes";
  */
 export function App() {
   return (
-    <Routes>
-      <Route path={routes.home} element={<HomePage />} />
-      <Route
-        path={routes.projects}
-        element={
-          <main className="min-h-dvh grid place-items-center px-6">
-            <p className="text-slate-500">Projects page — coming soon.</p>
-          </main>
-        }
-      />
-    </Routes>
+    <Sentry.ErrorBoundary fallback={<ProductionErrorFallback />}>
+      <Routes>
+        <Route path={routes.home} element={<HomePage />} />
+        <Route
+          path={routes.projects}
+          element={
+            <main className="min-h-dvh grid place-items-center px-6">
+              <p className="text-slate-500">Projects page — coming soon.</p>
+            </main>
+          }
+        />
+      </Routes>
+    </Sentry.ErrorBoundary>
   );
 }
