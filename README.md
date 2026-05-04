@@ -1,7 +1,6 @@
 # LevelUp User
 
-Premium entry / cover page for the future **LevelUp User** product.
-Built with **React + TypeScript + Vite + Tailwind CSS**, organized in a small, layered architecture so the project is ready to scale without overengineering.
+Built with **React + TypeScript + Vite + Tailwind CSS**
 
 ---
 
