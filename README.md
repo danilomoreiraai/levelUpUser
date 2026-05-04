@@ -11,6 +11,8 @@ Built with **React + TypeScript + Vite + Tailwind CSS**, organized in a small, l
 src/
   app/
     App.tsx              # Router shell
+  lib/
+    monitoring.ts        # GlitchTip/Sentry-compatible error monitoring
   pages/
     HomePage.tsx         # Landing page (title + avatar + CTA)
   components/
@@ -44,32 +46,68 @@ Other scripts:
 
 ```bash
 npm run build     # Type-check + production build
+npm run ci        # Lint + production build
 npm run preview   # Preview the production build locally
+npm start         # Serve dist/ for production platforms
 ```
 
 ---
 
-## Connect to GitHub
+## CI
+
+GitHub Actions runs on every push to any branch:
+
+```txt
+npm ci
+npm run lint
+npm run build
+```
+
+Workflow file: `.github/workflows/ci.yml`.
+
+---
+
+## Deploy on Easypanel
+
+The production app is deployed on Easypanel with Cloud Native Buildpacks.
+
+Recommended settings:
+
+```txt
+Source: GitHub
+Repository: idanmoreira/levelUpUser
+Branch: main
+Build method: Buildpacks
+Builder: heroku/builder:24
+Start command: npm start
+Port: 3000
+```
+
+For Vite environment variables, enable Easypanel's `.env` file creation and rebuild the app after changes.
+
+---
+
+## Monitoring
+
+Frontend errors are captured with `@sentry/react` and sent to a Sentry-compatible backend. The current production setup uses GlitchTip.
+
+Required Easypanel variables:
+
+```txt
+VITE_APP_ENV=production
+VITE_SENTRY_DSN=<glitchtip-project-dsn>
+VITE_SENTRY_TRACES_SAMPLE_RATE=0
+```
+
+Errors are routed from GlitchTip to a Telegram group using a project alert webhook. Keep the Telegram bot token out of GitHub, frontend code, and this repository.
+
+Full setup notes: [`docs/monitoring.md`](docs/monitoring.md).
+
+---
+
+## GitHub Remote
 
 The repo lives at <https://github.com/idanmoreira/levelUpUser.git>.
-
-From the project root:
-
-```bash
-git init
-git add .
-git commit -m "feat: scaffold LevelUp User landing page"
-git branch -M main
-git remote add origin https://github.com/idanmoreira/levelUpUser.git
-git push -u origin main
-```
-
-If the remote already has commits, rebase first:
-
-```bash
-git pull --rebase origin main
-git push -u origin main
-```
 
 ---
 

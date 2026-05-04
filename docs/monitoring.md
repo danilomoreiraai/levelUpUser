@@ -1,6 +1,8 @@
 # Monitoring
 
-This project uses Sentry for frontend error monitoring. The app only sends events when `VITE_SENTRY_DSN` is configured.
+This project uses `@sentry/react` for frontend error monitoring. Production events are sent to GlitchTip, which is Sentry SDK compatible.
+
+The app only sends events when `VITE_SENTRY_DSN` is configured.
 
 ## Easypanel Environment
 
@@ -8,22 +10,23 @@ Add these variables to the app environment in Easypanel:
 
 ```txt
 VITE_APP_ENV=production
-VITE_SENTRY_DSN=https://YOUR_PUBLIC_KEY@YOUR_ORG.ingest.sentry.io/YOUR_PROJECT_ID
+VITE_SENTRY_DSN=https://YOUR_GLITCHTIP_DSN
 VITE_SENTRY_TRACES_SAMPLE_RATE=0
 ```
 
-Redeploy the app after changing Vite environment variables. Vite embeds `VITE_*` values at build time.
+Enable Easypanel's `.env` file creation for this app, then rebuild after changing Vite environment variables. Vite embeds `VITE_*` values at build time.
 
-## Sentry Project
+## GlitchTip Project
 
-1. Create a Sentry account or open an existing organization.
-2. Create a JavaScript React project.
-3. Copy the client DSN.
+1. Create a GlitchTip account or open an existing organization.
+2. Create a React project.
+3. Copy the project DSN.
 4. Paste the DSN into `VITE_SENTRY_DSN` in Easypanel.
+5. Rebuild the Easypanel app.
 
 ## Telegram Alerts
 
-Sentry captures the errors. Telegram delivery should be configured in Sentry as an alert action.
+GlitchTip captures errors. Telegram delivery is configured as a project alert recipient.
 
 ### Create Telegram Bot
 
@@ -41,30 +44,37 @@ https://api.telegram.org/botBOT_TOKEN/getUpdates
 
 8. Find the group `chat.id`. Group IDs usually start with `-`.
 
-### Create Sentry Webhook Alert
+### Create GlitchTip Project Alert
 
-If your Sentry plan has webhook alert actions:
+In the GlitchTip project:
 
-1. Go to `Alerts`.
-2. Create an Issue Alert.
-3. Trigger condition: `A new issue is created`.
-4. Action: send a webhook.
-5. Webhook URL:
+1. Open project settings.
+2. Go to `Project Alerts`.
+3. Click `Create New Alert`.
+4. Use the condition `If an event happens 1 time in 1 minute, send an alert`.
+5. Add an alert recipient.
+6. Choose webhook or URL recipient.
+7. Use this URL, replacing `BOT_TOKEN` and `CHAT_ID`:
 
 ```txt
-https://api.telegram.org/botBOT_TOKEN/sendMessage?chat_id=CHAT_ID&text=New%20Sentry%20issue%20in%20levelupuser.com
+https://api.telegram.org/botBOT_TOKEN/sendMessage?chat_id=CHAT_ID&text=Novo%20erro%20em%20levelupuser.com
 ```
 
-If webhook alert actions are not available on your Sentry plan, use Sentry email alerts first, then add a small relay service later. Do not put the Telegram bot token in frontend code.
+Do not put the Telegram bot token in frontend code, GitHub, or Easypanel variables for this frontend app. The token should live only in GlitchTip alert configuration or a backend relay.
 
 ## Local Test
 
-To verify Sentry delivery without exposing test controls in production UI, temporarily run this from the browser console in production:
+To verify GlitchTip delivery without exposing test controls in production UI, temporarily run this from the browser console in production:
 
 ```js
 setTimeout(() => {
-  throw new Error("Sentry production test");
+  throw new Error("GlitchTip production test");
 });
 ```
 
-Remove or resolve the test issue in Sentry after confirming alerts.
+Expected result:
+
+1. A new issue appears in GlitchTip.
+2. The Telegram group receives the project alert.
+
+Remove or resolve the test issue in GlitchTip after confirming alerts.
