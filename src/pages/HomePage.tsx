@@ -26,9 +26,6 @@ export function HomePage() {
         >
           LevelUp <span className="text-brand">User</span>
         </h1>
-        <p className="text-sm sm:text-base text-slate-500 max-w-xs">
-          Growth, progress, and digital identity — start your journey.
-        </p>
       </header>
 
       <AvatarPlaceholder />
