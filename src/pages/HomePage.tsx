@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { AvatarPlaceholder } from "@/components/avatar/AvatarPlaceholder";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -40,6 +41,13 @@ export function HomePage() {
       >
         Projects
       </Button>
+
+      <Link
+        className="text-sm font-medium text-slate-500 hover:text-brand"
+        to={routes.privacy}
+      >
+        Privacy Policy
+      </Link>
     </PageContainer>
   );
 }

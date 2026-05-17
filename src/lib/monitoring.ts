@@ -1,6 +1,12 @@
 import * as Sentry from "@sentry/react";
 
+import {
+  hasOptionalCookieConsent,
+  subscribeToCookieConsentChange,
+} from "@/lib/privacyConsent";
+
 const defaultEnvironment = import.meta.env.PROD ? "production" : "development";
+let hasInitializedMonitoring = false;
 
 function getTraceSampleRate() {
   const sampleRate = Number(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE ?? "0");
@@ -13,6 +19,10 @@ function getTraceSampleRate() {
 }
 
 export function initMonitoring() {
+  if (hasInitializedMonitoring || !hasOptionalCookieConsent()) {
+    return;
+  }
+
   const dsn = import.meta.env.VITE_SENTRY_DSN;
 
   if (!dsn) {
@@ -24,5 +34,14 @@ export function initMonitoring() {
     environment: import.meta.env.VITE_APP_ENV || defaultEnvironment,
     tracesSampleRate: getTraceSampleRate(),
     sendDefaultPii: false,
+  });
+  hasInitializedMonitoring = true;
+}
+
+export function initMonitoringConsentListener() {
+  return subscribeToCookieConsentChange((consent) => {
+    if (consent.choice === "accepted") {
+      initMonitoring();
+    }
   });
 }

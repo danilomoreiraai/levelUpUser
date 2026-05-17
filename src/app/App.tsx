@@ -1,7 +1,10 @@
 import * as Sentry from "@sentry/react";
 import { Route, Routes } from "react-router-dom";
 
+import { CookieConsentBanner } from "@/components/privacy/CookieConsentBanner";
 import { HomePage } from "@/pages/HomePage";
+import { NotFoundPage } from "@/pages/NotFoundPage";
+import { PrivacyPage } from "@/pages/PrivacyPage";
 import { routes } from "@/routes/routes";
 
 function ProductionErrorFallback() {
@@ -29,6 +32,7 @@ export function App() {
     <Sentry.ErrorBoundary fallback={<ProductionErrorFallback />}>
       <Routes>
         <Route path={routes.home} element={<HomePage />} />
+        <Route path={routes.privacy} element={<PrivacyPage />} />
         <Route
           path={routes.projects}
           element={
@@ -37,7 +41,9 @@ export function App() {
             </main>
           }
         />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      <CookieConsentBanner />
     </Sentry.ErrorBoundary>
   );
 }
