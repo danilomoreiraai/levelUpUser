@@ -7,6 +7,7 @@
 export const routes = {
   home: "/",
   privacy: "/privacy",
+  terms: "/terms",
   projects: "/projects",
 } as const;
 

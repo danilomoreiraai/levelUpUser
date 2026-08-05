@@ -5,6 +5,8 @@ import { CookieConsentBanner } from "@/components/privacy/CookieConsentBanner";
 import { HomePage } from "@/pages/HomePage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PrivacyPage } from "@/pages/PrivacyPage";
+import { ProjectsPage } from "@/pages/ProjectsPage";
+import { TermsPage } from "@/pages/TermsPage";
 import { routes } from "@/routes/routes";
 
 function ProductionErrorFallback() {
@@ -24,8 +26,6 @@ function ProductionErrorFallback() {
 
 /**
  * App shell. Wires the router; pages own their own layout.
- *
- * The `/projects` route is intentionally a placeholder until the projects page is built.
  */
 export function App() {
   return (
@@ -33,14 +33,8 @@ export function App() {
       <Routes>
         <Route path={routes.home} element={<HomePage />} />
         <Route path={routes.privacy} element={<PrivacyPage />} />
-        <Route
-          path={routes.projects}
-          element={
-            <main className="min-h-dvh grid place-items-center px-6">
-              <p className="text-slate-500">Projects page — coming soon.</p>
-            </main>
-          }
-        />
+        <Route path={routes.terms} element={<TermsPage />} />
+        <Route path={routes.projects} element={<ProjectsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <CookieConsentBanner />

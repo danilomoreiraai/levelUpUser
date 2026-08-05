@@ -39,12 +39,20 @@ export function HomePage() {
         Projects
       </Button>
 
-      <Link
-        className="text-sm font-medium text-slate-500 hover:text-brand"
-        to={routes.privacy}
-      >
-        Privacy Policy
-      </Link>
+      <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+        <Link
+          className="text-sm font-medium text-slate-500 hover:text-brand"
+          to={routes.privacy}
+        >
+          Privacy Policy
+        </Link>
+        <Link
+          className="text-sm font-medium text-slate-500 hover:text-brand"
+          to={routes.terms}
+        >
+          Termos de Servico
+        </Link>
+      </nav>
     </PageContainer>
   );
 }
