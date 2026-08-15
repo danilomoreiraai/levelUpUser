@@ -50,7 +50,7 @@ export function HomePage() {
           className="text-sm font-medium text-slate-500 hover:text-brand"
           to={routes.terms}
         >
-          Termos de Servico
+          Terms of Service
         </Link>
       </nav>
     </PageContainer>
