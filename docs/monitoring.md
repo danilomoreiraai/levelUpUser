@@ -4,6 +4,9 @@ This project uses `@sentry/react` for frontend error monitoring. Production even
 
 The app only sends events when `VITE_SENTRY_DSN` is configured.
 
+Optional project metrics also require optional cookie consent. Without consent,
+project clicks, hover intent, and thumbnail load failures are not sent.
+
 ## Easypanel Environment
 
 Add these variables to the app environment in Easypanel:
@@ -61,6 +64,23 @@ https://api.telegram.org/botBOT_TOKEN/sendMessage?chat_id=CHAT_ID&text=Novo%20er
 ```
 
 Do not put the Telegram bot token in frontend code, GitHub, or Easypanel variables for this frontend app. The token should live only in GlitchTip alert configuration or a backend relay.
+
+## Project Metrics
+
+Project showcase events are captured as Sentry messages with the prefix
+`Project metric:`. Use tags to filter dashboards or issue streams:
+
+```txt
+action=project_link_click
+action=project_card_hover
+action=project_thumbnail_error
+phase=delivered
+phase=inProgress
+```
+
+`project_card_hover` and `project_thumbnail_error` are tracked once per browser
+session per project to reduce noise. `project_link_click` is tracked for every
+external project click.
 
 ## Local Test
 

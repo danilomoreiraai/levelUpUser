@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+import { usePageMetadata } from "@/lib/pageMetadata";
 import { routes } from "@/routes/routes";
 
 const termsSections = [
@@ -38,6 +39,12 @@ const termsSections = [
 ];
 
 export function TermsPage() {
+  usePageMetadata({
+    title: "Terms of Service | LevelUp User",
+    description:
+      "Terms of service for using LevelUp User and viewing its software project showcase.",
+  });
+
   return (
     <main className="min-h-dvh bg-surface-subtle px-6 py-10 text-slate-900">
       <div className="mx-auto max-w-3xl">

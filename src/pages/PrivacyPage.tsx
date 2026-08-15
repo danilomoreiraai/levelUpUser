@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+import { usePageMetadata } from "@/lib/pageMetadata";
 import { routes } from "@/routes/routes";
 
 const policySections = [
@@ -38,6 +39,12 @@ const policySections = [
 ];
 
 export function PrivacyPage() {
+  usePageMetadata({
+    title: "Privacy Policy | LevelUp User",
+    description:
+      "Privacy policy for LevelUp User, including cookies, monitoring, retention, and user choices.",
+  });
+
   return (
     <main className="min-h-dvh bg-surface-subtle px-6 py-10 text-slate-900">
       <div className="mx-auto max-w-3xl">

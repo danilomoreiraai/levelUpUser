@@ -10,10 +10,15 @@ Built with **React + TypeScript + Vite + Tailwind CSS**
 src/
   app/
     App.tsx              # Router shell
+  data/
+    projects.ts          # Project showcase data
   lib/
     monitoring.ts        # GlitchTip/Sentry-compatible error monitoring
   pages/
     HomePage.tsx         # Landing page (title + avatar + CTA)
+    ProjectsPage.tsx     # Project cards and pipeline
+    PrivacyPage.tsx      # Privacy policy
+    TermsPage.tsx        # Terms of service
   components/
     layout/
       PageContainer.tsx  # Centered, full-viewport layout
@@ -50,6 +55,10 @@ npm run preview   # Preview the production build locally
 npm start         # Serve dist/ for production platforms
 ```
 
+Project thumbnails live in `public/projects/` and should be referenced from
+`src/data/projects.ts` with root-relative URLs such as
+`/projects/levelup-user.jpg`.
+
 ---
 
 ## CI
@@ -74,7 +83,7 @@ Recommended settings:
 
 ```txt
 Source: GitHub
-Repository: idanmoreira/levelUpUser
+Repository: danilomoreiraai/levelUpUser
 Branch: main
 Build method: Buildpacks
 Builder: heroku/builder:24
@@ -82,7 +91,15 @@ Start command: npm start
 Port: 3000
 ```
 
-For Vite environment variables, enable Easypanel's `.env` file creation and rebuild the app after changes.
+For Vite environment variables, enable Easypanel's `.env` file creation and
+rebuild the app after changes. If production does not update after a push,
+trigger a manual rebuild in Easypanel.
+
+Optional automatic rebuild:
+
+1. Create an Easypanel deploy/rebuild webhook for the app.
+2. Add it to GitHub repository secrets as `EASYPANEL_DEPLOY_WEBHOOK_URL`.
+3. After CI passes on `main`, `.github/workflows/deploy.yml` calls the webhook.
 
 ---
 
@@ -100,13 +117,17 @@ VITE_SENTRY_TRACES_SAMPLE_RATE=0
 
 Errors are routed from GlitchTip to a Telegram group using a project alert webhook. Keep the Telegram bot token out of GitHub, frontend code, and this repository.
 
+Project interactions are reported only after optional cookie consent is accepted.
+Tracked events include project link clicks, card hover intent, and thumbnail load
+failures.
+
 Full setup notes: [`docs/monitoring.md`](docs/monitoring.md).
 
 ---
 
 ## GitHub Remote
 
-The repo lives at <https://github.com/idanmoreira/levelUpUser.git>.
+The repo lives at <https://github.com/danilomoreiraai/levelUpUser.git>.
 
 ---
 
@@ -119,8 +140,11 @@ The repo lives at <https://github.com/idanmoreira/levelUpUser.git>.
 
 ---
 
-## Roadmap (not implemented yet)
+## Maintenance checklist
 
-- `/projects` page
-- Replace `AvatarPlaceholder` with a stylized avatar bust (SVG or animated component)
-- Auth, dashboards, backend — intentionally out of scope for this entry screen
+- Add or update projects in `src/data/projects.ts`.
+- Keep thumbnails cropped to 16:9 and below 150KB when possible.
+- Run `npm run lint` and `npm run build` before pushing.
+- Push to `main` and confirm GitHub Actions passes.
+- Confirm Easypanel rebuilt production after the push.
+- Review GlitchTip/Sentry events after production changes.

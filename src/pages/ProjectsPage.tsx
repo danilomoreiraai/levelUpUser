@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { projects } from "@/data/projects";
 import type { Project } from "@/data/projects";
 import type { ProjectPhase } from "@/data/projects";
+import { trackProjectMetric } from "@/lib/monitoring";
+import { usePageMetadata } from "@/lib/pageMetadata";
 import { routes } from "@/routes/routes";
 
 const projectSections: {
@@ -34,6 +36,16 @@ function ProjectPlaceholder({ project }: { project: Project }) {
 }
 
 function ProjectPreview({ project }: { project: Project }) {
+  function trackThumbnailError() {
+    trackProjectMetric({
+      action: "project_thumbnail_error",
+      phase: project.phase,
+      projectTitle: project.title,
+      status: project.status,
+      url: project.url,
+    });
+  }
+
   return (
     <>
       <ProjectPlaceholder project={project} />
@@ -41,7 +53,12 @@ function ProjectPreview({ project }: { project: Project }) {
         <img
           alt={`${project.title} website thumbnail`}
           className="absolute inset-0 h-full w-full object-cover opacity-0 transition duration-500 ease-out group-hover:scale-[1.02] group-hover:opacity-100 group-focus-within:opacity-100"
+          decoding="async"
+          loading="lazy"
+          onError={trackThumbnailError}
           src={project.thumbnailUrl}
+          width="1200"
+          height="675"
         />
       ) : null}
     </>
@@ -49,8 +66,32 @@ function ProjectPreview({ project }: { project: Project }) {
 }
 
 function ProjectCard({ project }: { project: Project }) {
+  function trackHoverIntent() {
+    trackProjectMetric({
+      action: "project_card_hover",
+      phase: project.phase,
+      projectTitle: project.title,
+      status: project.status,
+      url: project.url,
+    });
+  }
+
+  function trackLinkClick() {
+    trackProjectMetric({
+      action: "project_link_click",
+      phase: project.phase,
+      projectTitle: project.title,
+      status: project.status,
+      url: project.url,
+    });
+  }
+
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article
+      className="group flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      onFocus={trackHoverIntent}
+      onMouseEnter={trackHoverIntent}
+    >
       <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
         <ProjectPreview project={project} />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
@@ -83,6 +124,7 @@ function ProjectCard({ project }: { project: Project }) {
           <a
             className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition hover:bg-brand-hover"
             href={project.url}
+            onClick={trackLinkClick}
             rel="noreferrer"
             target="_blank"
           >
@@ -143,6 +185,16 @@ function ProjectSection({
 }
 
 function PipelineProjectCard({ project }: { project: Project }) {
+  function trackLinkClick() {
+    trackProjectMetric({
+      action: "project_link_click",
+      phase: project.phase,
+      projectTitle: project.title,
+      status: project.status,
+      url: project.url,
+    });
+  }
+
   const content = (
     <>
       <div className="flex items-start justify-between gap-3">
@@ -186,6 +238,7 @@ function PipelineProjectCard({ project }: { project: Project }) {
     <a
       className="group block rounded-lg border border-slate-200 bg-slate-50 p-4 transition hover:border-brand/30 hover:bg-white hover:shadow-sm"
       href={project.url}
+      onClick={trackLinkClick}
       rel="noreferrer"
       target="_blank"
     >
@@ -231,6 +284,12 @@ function PipelineSection() {
 }
 
 export function ProjectsPage() {
+  usePageMetadata({
+    title: "Projects | LevelUp User",
+    description:
+      "Browse delivered projects, active builds, and product concepts from LevelUp User.",
+  });
+
   return (
     <main className="min-h-dvh bg-surface-subtle px-6 py-10 text-slate-900">
       <div className="mx-auto w-full max-w-6xl">

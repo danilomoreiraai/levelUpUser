@@ -1,8 +1,14 @@
 import { Link } from "react-router-dom";
 
+import { usePageMetadata } from "@/lib/pageMetadata";
 import { routes } from "@/routes/routes";
 
 export function NotFoundPage() {
+  usePageMetadata({
+    title: "Page Not Found | LevelUp User",
+    description: "The requested LevelUp User page could not be found.",
+  });
+
   return (
     <main className="grid min-h-dvh place-items-center bg-surface-subtle px-6">
       <section className="max-w-sm text-center">

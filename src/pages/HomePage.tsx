@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { AvatarPlaceholder } from "@/components/avatar/AvatarPlaceholder";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/Button";
+import { usePageMetadata } from "@/lib/pageMetadata";
 import { routes } from "@/routes/routes";
 
 /**
@@ -14,6 +15,12 @@ import { routes } from "@/routes/routes";
  */
 export function HomePage() {
   const navigate = useNavigate();
+
+  usePageMetadata({
+    title: "LevelUp User | Project Portfolio",
+    description:
+      "A personal portfolio for software projects, product ideas, and active builds by LevelUp User.",
+  });
 
   return (
     <PageContainer>
