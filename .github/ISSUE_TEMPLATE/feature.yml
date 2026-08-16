@@ -1,0 +1,37 @@
+name: Feature or improvement
+description: Propose a user-facing or engineering improvement.
+title: "feat: "
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What problem or opportunity should be addressed?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Describe the intended implementation boundaries.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Add a verifiable checklist.
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy, security, and observability
+      description: Note consent, data, secrets, monitoring, and security impact.
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Which automated and manual checks prove completion?

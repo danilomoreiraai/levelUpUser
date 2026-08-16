@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
+import { Skeleton } from "@/components/feedback/Skeleton";
+import type { Project, ProjectPhase } from "@/data/projects";
 import { projects } from "@/data/projects";
-import type { Project } from "@/data/projects";
-import type { ProjectPhase } from "@/data/projects";
 import { trackProjectMetric } from "@/lib/monitoring";
 import { usePageMetadata } from "@/lib/pageMetadata";
 import { routes } from "@/routes/routes";
@@ -27,15 +28,15 @@ function ProjectPlaceholder({ project }: { project: Project }) {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/75">
           {project.url ? "Preview" : "Concept"}
         </p>
-        <p className="mt-2 text-xl font-semibold tracking-tight">
-          {project.title}
-        </p>
+        <p className="mt-2 text-xl font-semibold tracking-tight">{project.title}</p>
       </div>
     </div>
   );
 }
 
 function ProjectPreview({ project }: { project: Project }) {
+  const [isLoading, setIsLoading] = useState(Boolean(project.thumbnailUrl));
+
   function trackThumbnailError() {
     trackProjectMetric({
       action: "project_thumbnail_error",
@@ -50,16 +51,30 @@ function ProjectPreview({ project }: { project: Project }) {
     <>
       <ProjectPlaceholder project={project} />
       {project.thumbnailUrl ? (
-        <img
-          alt={`${project.title} website thumbnail`}
-          className="absolute inset-0 h-full w-full object-cover opacity-0 transition duration-500 ease-out group-hover:scale-[1.02] group-hover:opacity-100 group-focus-within:opacity-100"
-          decoding="async"
-          loading="lazy"
-          onError={trackThumbnailError}
-          src={project.thumbnailUrl}
-          width="1200"
-          height="675"
-        />
+        <>
+          {isLoading ? (
+            <Skeleton
+              className="absolute inset-0 rounded-none"
+              label={`Loading ${project.title} preview`}
+            />
+          ) : null}
+          <img
+            alt={`${project.title} website thumbnail`}
+            className={`absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.02] ${
+              isLoading ? "opacity-0" : "opacity-100"
+            }`}
+            decoding="async"
+            height="675"
+            loading="lazy"
+            onError={() => {
+              setIsLoading(false);
+              trackThumbnailError();
+            }}
+            onLoad={() => setIsLoading(false)}
+            src={project.thumbnailUrl}
+            width="1200"
+          />
+        </>
       ) : null}
     </>
   );
@@ -101,13 +116,9 @@ function ProjectCard({ project }: { project: Project }) {
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-          {project.title}
-        </h2>
+        <h2 className="text-xl font-semibold tracking-tight text-slate-900">{project.title}</h2>
 
-        <p className="mt-3 text-sm leading-6 text-slate-600">
-          {project.description}
-        </p>
+        <p className="mt-3 text-sm leading-6 text-slate-600">{project.description}</p>
 
         <div className="mt-4 flex flex-wrap gap-2">
           {project.tags.map((tag) => (
@@ -161,17 +172,11 @@ function ProjectSection({
     <section className="mt-12">
       <div className="flex flex-col justify-between gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-brand">
-            {eyebrow}
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-            {title}
-          </h2>
+          <p className="text-sm font-medium uppercase tracking-wide text-brand">{eyebrow}</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{title}</h2>
         </div>
         {description ? (
-          <p className="max-w-sm text-sm leading-6 text-slate-600">
-            {description}
-          </p>
+          <p className="max-w-sm text-sm leading-6 text-slate-600">{description}</p>
         ) : null}
       </div>
 
@@ -210,9 +215,7 @@ function PipelineProjectCard({ project }: { project: Project }) {
           {project.url ? "Open" : "Soon"}
         </span>
       </div>
-      <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
-        {project.description}
-      </p>
+      <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{project.description}</p>
       <div className="mt-4 flex flex-wrap gap-2">
         {project.tags.slice(0, 4).map((tag) => (
           <span
@@ -248,20 +251,14 @@ function PipelineProjectCard({ project }: { project: Project }) {
 }
 
 function PipelineSection() {
-  const inProgressProjects = projects.filter(
-    (project) => project.phase === "inProgress",
-  );
+  const inProgressProjects = projects.filter((project) => project.phase === "inProgress");
 
   return (
     <section className="mt-12 rounded-lg border border-slate-200 bg-white p-6">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-brand">
-            Pipeline
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-            In progress
-          </h2>
+          <p className="text-sm font-medium uppercase tracking-wide text-brand">Pipeline</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">In progress</h2>
         </div>
         <p className="max-w-sm text-sm leading-6 text-slate-600">
           Smaller previews for work that is not ready for the main showcase yet.
@@ -293,23 +290,17 @@ export function ProjectsPage() {
   return (
     <main className="min-h-dvh bg-surface-subtle px-6 py-10 text-slate-900">
       <div className="mx-auto w-full max-w-6xl">
-        <Link
-          className="text-sm font-medium text-brand hover:text-brand-hover"
-          to={routes.home}
-        >
+        <Link className="text-sm font-medium text-brand hover:text-brand-hover" to={routes.home}>
           Back to home
         </Link>
 
         <header className="mt-8 border-b border-slate-200 pb-8">
-          <p className="text-sm font-medium uppercase tracking-wide text-brand">
-            Projects
-          </p>
+          <p className="text-sm font-medium uppercase tracking-wide text-brand">Projects</p>
           <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight sm:text-5xl">
             Ideas, products, and active builds.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-            A focused look at the products I design, build, validate, and keep
-            improving.
+            A focused look at the products I design, build, validate, and keep improving.
           </p>
         </header>
 

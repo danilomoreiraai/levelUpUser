@@ -1,17 +1,11 @@
 import * as Sentry from "@sentry/react";
 
-import {
-  hasOptionalCookieConsent,
-  subscribeToCookieConsentChange,
-} from "@/lib/privacyConsent";
+import { hasOptionalCookieConsent, subscribeToCookieConsentChange } from "@/lib/privacyConsent";
 
 const defaultEnvironment = import.meta.env.PROD ? "production" : "development";
 let hasInitializedMonitoring = false;
 
-type ProjectMetricAction =
-  | "project_card_hover"
-  | "project_link_click"
-  | "project_thumbnail_error";
+type ProjectMetricAction = "project_card_hover" | "project_link_click" | "project_thumbnail_error";
 
 function getTraceSampleRate() {
   const sampleRate = Number(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE ?? "0");
@@ -45,7 +39,7 @@ export function initMonitoring() {
 
 export function initMonitoringConsentListener() {
   return subscribeToCookieConsentChange((consent) => {
-    if (consent.choice === "accepted") {
+    if (consent.preferences.monitoring) {
       initMonitoring();
     }
   });
@@ -63,10 +57,7 @@ function hasTrackedProjectMetric(action: ProjectMetricAction, projectTitle: stri
   }
 }
 
-function markProjectMetricTracked(
-  action: ProjectMetricAction,
-  projectTitle: string,
-) {
+function markProjectMetricTracked(action: ProjectMetricAction, projectTitle: string) {
   try {
     sessionStorage.setItem(getProjectMetricKey(action, projectTitle), "1");
   } catch {

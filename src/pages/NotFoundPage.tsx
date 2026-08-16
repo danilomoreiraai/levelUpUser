@@ -12,9 +12,7 @@ export function NotFoundPage() {
   return (
     <main className="grid min-h-dvh place-items-center bg-surface-subtle px-6">
       <section className="max-w-sm text-center">
-        <p className="text-sm font-medium uppercase tracking-wide text-brand">
-          404
-        </p>
+        <p className="text-sm font-medium uppercase tracking-wide text-brand">404</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
           Page not found
         </h1>

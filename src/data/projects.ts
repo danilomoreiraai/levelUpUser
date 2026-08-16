@@ -1,10 +1,6 @@
 export type ProjectPhase = "delivered" | "inProgress";
 
-export type ProjectStatus =
-  | "Live"
-  | "In progress"
-  | "Delivered"
-  | "Planned";
+type ProjectStatus = "Live" | "In progress" | "Delivered" | "Planned";
 
 export type Project = {
   title: string;
@@ -43,14 +39,7 @@ export const projects: Project[] = [
     url: "https://link.julianamanduca.com.br",
     phase: "delivered",
     status: "Live",
-    tags: [
-      "Link Hub",
-      "Personal Brand",
-      "HTML",
-      "CSS",
-      "JavaScript",
-      "Responsive UI",
-    ],
+    tags: ["Link Hub", "Personal Brand", "HTML", "CSS", "JavaScript", "Responsive UI"],
     thumbnailUrl: "/projects/juliana-linktree.jpg",
   },
   {

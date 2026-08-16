@@ -1,5 +1,5 @@
-import { forwardRef } from "react";
 import type { ButtonHTMLAttributes } from "react";
+import { forwardRef } from "react";
 
 type ButtonVariant = "primary" | "secondary";
 
@@ -16,10 +16,8 @@ const baseClasses =
   "disabled:opacity-50 disabled:cursor-not-allowed";
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary:
-    "bg-brand text-white shadow-sm hover:bg-brand-hover active:bg-brand-active",
-  secondary:
-    "bg-white text-brand ring-1 ring-brand/20 hover:bg-brand/5 active:bg-brand/10",
+  primary: "bg-brand text-white shadow-sm hover:bg-brand-hover active:bg-brand-active",
+  secondary: "bg-white text-brand ring-1 ring-brand/20 hover:bg-brand/5 active:bg-brand/10",
 };
 
 /**
@@ -32,9 +30,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   { variant = "primary", className = "", type = "button", ...props },
   ref,
 ) {
-  const classes = [baseClasses, variantClasses[variant], className]
-    .filter(Boolean)
-    .join(" ");
+  const classes = [baseClasses, variantClasses[variant], className].filter(Boolean).join(" ");
 
   return <button ref={ref} type={type} className={classes} {...props} />;
 });
