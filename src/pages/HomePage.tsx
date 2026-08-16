@@ -1,5 +1,4 @@
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { AvatarPlaceholder } from "@/components/avatar/AvatarPlaceholder";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -47,16 +46,10 @@ export function HomePage() {
       </Button>
 
       <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-        <Link
-          className="text-sm font-medium text-slate-500 hover:text-brand"
-          to={routes.privacy}
-        >
+        <Link className="text-sm font-medium text-slate-500 hover:text-brand" to={routes.privacy}>
           Privacy Policy
         </Link>
-        <Link
-          className="text-sm font-medium text-slate-500 hover:text-brand"
-          to={routes.terms}
-        >
+        <Link className="text-sm font-medium text-slate-500 hover:text-brand" to={routes.terms}>
           Terms of Service
         </Link>
       </nav>

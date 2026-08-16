@@ -48,24 +48,17 @@ export function TermsPage() {
   return (
     <main className="min-h-dvh bg-surface-subtle px-6 py-10 text-slate-900">
       <div className="mx-auto max-w-3xl">
-        <Link
-          className="text-sm font-medium text-brand hover:text-brand-hover"
-          to={routes.home}
-        >
+        <Link className="text-sm font-medium text-brand hover:text-brand-hover" to={routes.home}>
           Back to home
         </Link>
 
         <header className="mt-8 border-b border-slate-200 pb-8">
-          <p className="text-sm font-medium uppercase tracking-wide text-brand">
-            Terms
-          </p>
-          <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-            Terms of Service
-          </h1>
+          <p className="text-sm font-medium uppercase tracking-wide text-brand">Terms</p>
+          <h1 className="mt-3 text-4xl font-semibold tracking-tight">Terms of Service</h1>
           <p className="mt-4 text-sm leading-6 text-slate-600">
-            Last updated: August 15, 2026. These terms explain the conditions
-            for using LevelUp User, a personal website for presenting live,
-            in-progress, and upcoming software projects.
+            Last updated: August 15, 2026. These terms explain the conditions for using LevelUp
+            User, a personal website for presenting live, in-progress, and upcoming software
+            projects.
           </p>
         </header>
 
@@ -76,18 +69,15 @@ export function TermsPage() {
               key={section.title}
             >
               <h2 className="text-lg font-semibold">{section.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                {section.body}
-              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{section.body}</p>
             </section>
           ))}
         </div>
 
         <p className="mt-8 text-xs leading-5 text-slate-500">
-          This page is a practical terms notice for a personal portfolio
-          website and is not a substitute for legal advice. Review it with
-          counsel before relying on it for regulated, commercial, or higher-risk
-          contexts.
+          This page is a practical terms notice for a personal portfolio website and is not a
+          substitute for legal advice. Review it with counsel before relying on it for regulated,
+          commercial, or higher-risk contexts.
         </p>
       </div>
     </main>

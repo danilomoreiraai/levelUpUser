@@ -25,3 +25,45 @@
     @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-white;
   }
 }
+
+@layer utilities {
+  .skeleton::after {
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 70%), transparent);
+    content: "";
+    display: block;
+    height: 100%;
+    transform: translateX(-100%);
+    width: 100%;
+  }
+
+  .route-progress {
+    animation: route-progress 1.1s ease-in-out infinite;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes route-progress {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(410%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -18,9 +18,7 @@ export function PageContainer({ children }: PageContainerProps) {
         bg-gradient-to-b from-surface to-surface-subtle
       "
     >
-      <div className="w-full max-w-md flex flex-col items-center gap-10">
-        {children}
-      </div>
+      <div className="w-full max-w-md flex flex-col items-center gap-10">{children}</div>
     </main>
   );
 }

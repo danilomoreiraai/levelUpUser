@@ -22,9 +22,7 @@ async function waitForPageAssets() {
 }
 
 function createOptions(targetSelector: string): LiquidGLOptions {
-  const prefersReducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)",
-  ).matches;
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const isSmallViewport = window.matchMedia("(max-width: 767px)").matches;
 
   return {

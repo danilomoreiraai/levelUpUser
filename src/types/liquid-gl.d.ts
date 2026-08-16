@@ -31,12 +31,9 @@ declare module "liquid-gl" {
   type DynamicElements = string | Element[];
 
   type LiquidGL = {
-    (options: LiquidGLOptions):
-      | LiquidGLInstance
-      | LiquidGLInstance[]
-      | Element
-      | Element[]
-      | undefined;
+    (
+      options: LiquidGLOptions,
+    ): LiquidGLInstance | LiquidGLInstance[] | Element | Element[] | undefined;
     registerDynamic(elements: DynamicElements): void;
     syncWith(config?: Record<string, unknown>): unknown;
   };
