@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/react";
 import { Route, Routes } from "react-router-dom";
 
+import { LiquidGlassNavigation } from "@/components/effects/LiquidGlassNavigation";
 import { CookieConsentBanner } from "@/components/privacy/CookieConsentBanner";
 import { HomePage } from "@/pages/HomePage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
@@ -30,6 +31,7 @@ function ProductionErrorFallback() {
 export function App() {
   return (
     <Sentry.ErrorBoundary fallback={<ProductionErrorFallback />}>
+      <LiquidGlassNavigation />
       <Routes>
         <Route path={routes.home} element={<HomePage />} />
         <Route path={routes.privacy} element={<PrivacyPage />} />
