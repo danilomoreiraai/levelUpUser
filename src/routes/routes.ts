@@ -9,4 +9,5 @@ export const routes = {
   privacy: "/privacy",
   terms: "/terms",
   projects: "/projects",
+  services: "/services",
 } as const;

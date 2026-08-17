@@ -12,7 +12,7 @@ function getLinkClasses({ isActive }: { isActive: boolean }) {
     : "text-slate-700 hover:bg-white/55 hover:text-brand";
 
   return [
-    "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+    "rounded-full px-3 py-2 text-sm font-medium transition-colors sm:px-4",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand",
     stateClasses,
   ].join(" ");
@@ -57,6 +57,9 @@ export function LiquidGlassNavigation() {
         </NavLink>
         <NavLink className={getLinkClasses} to={routes.projects}>
           Projects
+        </NavLink>
+        <NavLink className={getLinkClasses} to={routes.services}>
+          Services
         </NavLink>
       </nav>
     </div>

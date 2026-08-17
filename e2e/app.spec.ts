@@ -13,6 +13,20 @@ test("navigates between lazy-loaded routes", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("shows the upcoming services from the primary navigation", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Reject optional" }).click();
+  await page.getByRole("link", { name: "Services", exact: true }).click();
+
+  await expect(page).toHaveURL(/\/services$/);
+  await expect(
+    page.getByRole("heading", { name: "Simple tools for everyday tasks." }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "URL Shortener" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "QR Code Generator" })).toBeVisible();
+  await expect(page.getByText("Coming soon", { exact: true })).toHaveCount(2);
+});
+
 test("persists granular privacy choices", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Manage" }).click();
