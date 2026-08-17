@@ -26,6 +26,11 @@ const ProjectsPage = lazy(() =>
     default: module.ProjectsPage,
   })),
 );
+const ServicesPage = lazy(() =>
+  import("@/pages/ServicesPage").then((module) => ({
+    default: module.ServicesPage,
+  })),
+);
 const TermsPage = lazy(() =>
   import("@/pages/TermsPage").then((module) => ({
     default: module.TermsPage,
@@ -66,6 +71,7 @@ function AnimatedRoutes() {
             <Route path={routes.privacy} element={<PrivacyPage />} />
             <Route path={routes.terms} element={<TermsPage />} />
             <Route path={routes.projects} element={<ProjectsPage />} />
+            <Route path={routes.services} element={<ServicesPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
