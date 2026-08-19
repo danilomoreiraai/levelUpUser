@@ -2,12 +2,9 @@ import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-const appRelease =
-  process.env.VITE_APP_RELEASE ??
-  process.env.CF_PAGES_COMMIT_SHA ??
-  process.env.GITHUB_SHA ??
-  process.env.SOURCE_VERSION ??
-  "unknown";
+import { resolveAppRelease } from "./build/releaseEnvironment";
+
+const appRelease = resolveAppRelease(process.env);
 
 // https://vitejs.dev/config/
 export default defineConfig({

@@ -79,8 +79,8 @@ VITE_OTEL_EXPORTER_OTLP_ENDPOINT=
 Vite embeds `VITE_*` values at build time. Never commit real secrets, private collector credentials,
 or access tokens. Google Analytics and Meta Pixel identifiers are inactive until matching consent is
 granted. OpenTelemetry browser export must target a secure, CORS-restricted collector endpoint. The
-build resolves its release from `VITE_APP_RELEASE`, Cloudflare Pages, GitHub Actions, or the buildpack
-`SOURCE_VERSION`, in that order.
+build resolves its release from `VITE_APP_RELEASE`, Cloudflare Pages, GitHub Actions, Easypanel's
+`GIT_SHA`, or the buildpack `SOURCE_VERSION`, in that order.
 
 ## Observability
 

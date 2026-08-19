@@ -35,7 +35,7 @@ Do not place private API keys, collector credentials, Telegram bot tokens, or se
 1. Create a React project in Sentry, GlitchTip, or another compatible service.
 2. Configure its project DSN as `VITE_SENTRY_DSN`.
 3. Configure `VITE_APP_RELEASE` with the deployed commit SHA when the platform does not expose
-   `CF_PAGES_COMMIT_SHA`, `GITHUB_SHA`, or `SOURCE_VERSION` during the build.
+   `CF_PAGES_COMMIT_SHA`, `GITHUB_SHA`, Easypanel's `GIT_SHA`, or `SOURCE_VERSION` during the build.
 4. Keep the trace sample rate at `0` until the production sampling and retention policy is approved.
 5. Grant monitoring consent in the application and verify one controlled exception.
 6. Revoke consent and verify that a new session does not send optional events.
