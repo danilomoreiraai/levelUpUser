@@ -1,11 +1,17 @@
 import {
   type CookieConsentPreferences,
   getCookieConsent,
+  hasCookieConsent,
   subscribeToCookieConsentChange,
 } from "@/lib/privacyConsent";
 
 let hasInitializedAnalytics = false;
 let hasInitializedMarketing = false;
+
+export type ProjectMetricAction =
+  | "project_card_hover"
+  | "project_link_click"
+  | "project_thumbnail_error";
 
 function appendScript(id: string, source: string) {
   if (document.getElementById(id)) return;
@@ -80,4 +86,56 @@ export function initTrackingConsent() {
   return subscribeToCookieConsentChange((nextConsent) => {
     applyTrackingConsent(nextConsent.preferences);
   });
+}
+
+function getProjectMetricKey(action: ProjectMetricAction, projectTitle: string) {
+  return `levelup-project-metric:${action}:${projectTitle}`;
+}
+
+function hasTrackedProjectMetric(action: ProjectMetricAction, projectTitle: string) {
+  try {
+    return sessionStorage.getItem(getProjectMetricKey(action, projectTitle)) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markProjectMetricTracked(action: ProjectMetricAction, projectTitle: string) {
+  try {
+    sessionStorage.setItem(getProjectMetricKey(action, projectTitle), "1");
+  } catch {
+    // Session storage can be unavailable in strict browser privacy modes.
+  }
+}
+
+export function trackProjectMetric({
+  action,
+  phase,
+  projectTitle,
+  status,
+}: {
+  action: ProjectMetricAction;
+  phase: string;
+  projectTitle: string;
+  status: string;
+}) {
+  if (!hasCookieConsent("analytics")) {
+    return;
+  }
+
+  const shouldTrackOnce = action !== "project_link_click";
+
+  if (shouldTrackOnce && hasTrackedProjectMetric(action, projectTitle)) {
+    return;
+  }
+
+  window.gtag?.("event", action, {
+    project_phase: phase,
+    project_title: projectTitle,
+    project_status: status,
+  });
+
+  if (shouldTrackOnce) {
+    markProjectMetricTracked(action, projectTitle);
+  }
 }

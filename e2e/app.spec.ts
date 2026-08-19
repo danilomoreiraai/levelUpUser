@@ -29,3 +29,19 @@ test("shows the not-found route", async ({ page }) => {
   await page.goto("/missing-page");
   await expect(page.getByRole("heading", { name: /Page not found/i })).toBeVisible();
 });
+
+test("serves HTML and hashed assets with safe cache policies", async ({ request }) => {
+  const documentResponse = await request.get("/");
+  const documentHtml = await documentResponse.text();
+  const entryAsset = documentHtml.match(/src="\/(assets\/index-[^"]+\.js)"/)?.[1];
+
+  expect(documentResponse.headers()["cache-control"]).toContain("max-age=0");
+  expect(entryAsset).toBeTruthy();
+
+  const assetResponse = await request.get(`/${entryAsset}`);
+  expect(assetResponse.headers()["cache-control"]).toBe("public, max-age=31536000, immutable");
+
+  const missingAssetResponse = await request.get("/assets/removed-release-chunk.js");
+  expect(missingAssetResponse.status()).toBe(404);
+  expect(missingAssetResponse.headers()["content-type"]).toBeUndefined();
+});

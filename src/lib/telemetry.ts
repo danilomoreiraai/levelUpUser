@@ -1,3 +1,4 @@
+import type { Tracer } from "@opentelemetry/api";
 import type { Metric } from "web-vitals";
 
 import {
@@ -9,6 +10,7 @@ import {
 
 let hasInitializedWebVitals = false;
 let openTelemetryProvider: { shutdown(): Promise<void> } | undefined;
+let openTelemetryTracer: Tracer | undefined;
 let isInitializingOpenTelemetry = false;
 
 function reportWebVital(metric: Metric) {
@@ -23,15 +25,9 @@ function reportWebVital(metric: Metric) {
     window.gtag?.("event", metric.name, attributes);
   }
 
-  if (hasCookieConsent("monitoring")) {
-    void import("@sentry/react").then((Sentry) => {
-      Sentry.captureMessage(`Web Vital: ${metric.name}`, {
-        extra: attributes,
-        level: metric.rating === "poor" ? "warning" : "info",
-        tags: { metric: metric.name, rating: metric.rating },
-      });
-    });
-  }
+  const span = openTelemetryTracer?.startSpan(`web-vital.${metric.name.toLowerCase()}`);
+  span?.setAttributes(attributes);
+  span?.end();
 }
 
 async function initializeWebVitals() {
@@ -84,7 +80,8 @@ async function initializeOpenTelemetry() {
     provider.register();
     openTelemetryProvider = provider;
 
-    const span = trace.getTracer("levelup-user-web").startSpan("app.bootstrap");
+    openTelemetryTracer = trace.getTracer("levelup-user-web");
+    const span = openTelemetryTracer.startSpan("app.bootstrap");
     span.setAttribute("app.route", window.location.pathname);
     span.end();
   } finally {
@@ -95,6 +92,7 @@ async function initializeOpenTelemetry() {
 async function stopOpenTelemetry() {
   const provider = openTelemetryProvider;
   openTelemetryProvider = undefined;
+  openTelemetryTracer = undefined;
   await provider?.shutdown();
 }
 

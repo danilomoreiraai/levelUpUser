@@ -7,18 +7,24 @@ type InitializeLiquidGlassOptions = {
   targetSelector: string;
 };
 
-function waitForNextPaint() {
+function waitForIdleTime() {
   return new Promise<void>((resolve) => {
-    window.requestAnimationFrame(() => resolve());
+    const requestIdleCallback = window.requestIdleCallback?.bind(window);
+
+    if (requestIdleCallback) {
+      requestIdleCallback(() => resolve(), { timeout: 2_000 });
+      return;
+    }
+
+    setTimeout(resolve, 1_500);
   });
 }
 
-async function waitForPageAssets() {
-  await waitForNextPaint();
+function shouldInitializeLiquidGlass() {
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hasLimitedCpu = navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 2;
 
-  if (document.fonts?.ready) {
-    await document.fonts.ready;
-  }
+  return !prefersReducedMotion && !hasLimitedCpu;
 }
 
 function createOptions(targetSelector: string): LiquidGLOptions {
@@ -57,7 +63,11 @@ export async function initializeLiquidGlass({
     return;
   }
 
-  await waitForPageAssets();
+  if (!shouldInitializeLiquidGlass()) {
+    return;
+  }
+
+  await waitForIdleTime();
 
   if (!target.isConnected || initializedTargets.has(target)) {
     return;

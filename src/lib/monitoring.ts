@@ -1,11 +1,9 @@
-import * as Sentry from "@sentry/react";
-
 import { hasOptionalCookieConsent, subscribeToCookieConsentChange } from "@/lib/privacyConsent";
+import { appRelease } from "@/lib/release";
 
 const defaultEnvironment = import.meta.env.PROD ? "production" : "development";
 let hasInitializedMonitoring = false;
-
-type ProjectMetricAction = "project_card_hover" | "project_link_click" | "project_thumbnail_error";
+let sentryModulePromise: Promise<typeof import("@sentry/react")> | undefined;
 
 function getTraceSampleRate() {
   const sampleRate = Number(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE ?? "0");
@@ -17,7 +15,12 @@ function getTraceSampleRate() {
   return sampleRate;
 }
 
-export function initMonitoring() {
+function loadSentry() {
+  sentryModulePromise ??= import("@sentry/react");
+  return sentryModulePromise;
+}
+
+async function initializeMonitoring() {
   if (hasInitializedMonitoring || !hasOptionalCookieConsent()) {
     return;
   }
@@ -28,81 +31,61 @@ export function initMonitoring() {
     return;
   }
 
+  const Sentry = await loadSentry();
+
+  if (hasInitializedMonitoring || !hasOptionalCookieConsent()) {
+    return;
+  }
+
   Sentry.init({
     dsn,
     environment: import.meta.env.VITE_APP_ENV || defaultEnvironment,
+    release: appRelease === "unknown" ? undefined : appRelease,
     tracesSampleRate: getTraceSampleRate(),
     sendDefaultPii: false,
   });
   hasInitializedMonitoring = true;
 }
 
+export function initMonitoring() {
+  void initializeMonitoring();
+}
+
+async function stopMonitoring() {
+  if (!hasInitializedMonitoring) {
+    return;
+  }
+
+  const Sentry = await loadSentry();
+  await Sentry.close(2_000);
+  hasInitializedMonitoring = false;
+}
+
 export function initMonitoringConsentListener() {
   return subscribeToCookieConsentChange((consent) => {
     if (consent.preferences.monitoring) {
       initMonitoring();
+      return;
     }
+
+    void stopMonitoring();
   });
 }
 
-function getProjectMetricKey(action: ProjectMetricAction, projectTitle: string) {
-  return `levelup-project-metric:${action}:${projectTitle}`;
-}
-
-function hasTrackedProjectMetric(action: ProjectMetricAction, projectTitle: string) {
-  try {
-    return sessionStorage.getItem(getProjectMetricKey(action, projectTitle)) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function markProjectMetricTracked(action: ProjectMetricAction, projectTitle: string) {
-  try {
-    sessionStorage.setItem(getProjectMetricKey(action, projectTitle), "1");
-  } catch {
-    // Session storage can be unavailable in strict browser privacy modes.
-  }
-}
-
-export function trackProjectMetric({
-  action,
-  phase,
-  projectTitle,
-  status,
-  url,
-}: {
-  action: ProjectMetricAction;
-  phase: string;
-  projectTitle: string;
-  status: string;
-  url?: string;
-}) {
-  if (!hasInitializedMonitoring || !hasOptionalCookieConsent()) {
+export async function captureRuntimeError(
+  error: unknown,
+  context?: Record<string, string | number | boolean>,
+) {
+  if (!hasOptionalCookieConsent()) {
     return;
   }
 
-  const shouldTrackOnce = action !== "project_link_click";
+  await initializeMonitoring();
 
-  if (shouldTrackOnce && hasTrackedProjectMetric(action, projectTitle)) {
+  if (!hasInitializedMonitoring) {
     return;
   }
 
-  Sentry.captureMessage(`Project metric: ${action}`, {
-    level: "info",
-    tags: {
-      action,
-      phase,
-      project: projectTitle,
-      status,
-    },
-    extra: {
-      projectTitle,
-      url,
-    },
-  });
-
-  if (shouldTrackOnce) {
-    markProjectMetricTracked(action, projectTitle);
-  }
+  const Sentry = await loadSentry();
+  Sentry.captureException(error, { extra: context });
 }

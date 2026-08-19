@@ -14,6 +14,8 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
+declare const __APP_RELEASE__: string;
+
 interface Window {
   dataLayer?: unknown[];
   fbq?: ((...args: unknown[]) => void) & { queue?: unknown[][] };
