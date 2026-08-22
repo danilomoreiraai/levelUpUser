@@ -122,9 +122,10 @@ fallback. This prevents browsers from interpreting an HTML fallback as a JavaScr
 
 For the lowest cold-start latency, deploy the same build to Cloudflare Pages with build command
 `npm run build` and output directory `dist`. The committed `public/_headers` file applies the same
-cache policy on Pages, while `public/_redirects` preserves direct navigation to SPA routes. Validate
-the preview deployment, environment variables, consent flows, custom domain, and rollback before
-removing the Easypanel service.
+cache policy on Pages. Pages' default SPA routing preserves direct navigation, while
+`public/assets/404.html` prevents missing hashed chunks from being rewritten to `index.html`.
+Validate the preview deployment, environment variables, consent flows, custom domain, and rollback
+before removing the Easypanel service.
 
 The production build enforces a 120 KiB gzip budget for the entry JavaScript bundle. Override
 `MAX_ENTRY_GZIP_BYTES` only for an investigated, documented exception.

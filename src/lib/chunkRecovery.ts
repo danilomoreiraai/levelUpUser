@@ -38,7 +38,7 @@ function clearRecoveryAttempt() {
 }
 
 export function handleVitePreloadError(event: VitePreloadErrorEvent, reloadPage: () => void) {
-  if (hasRecoveryAttempt()) {
+  if (!navigator.onLine || hasRecoveryAttempt()) {
     return false;
   }
 
