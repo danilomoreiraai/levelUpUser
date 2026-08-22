@@ -18,6 +18,7 @@ retention, transfer safeguards, and consent category in the privacy policy.
 
 ```txt
 VITE_APP_ENV=production
+VITE_APP_RELEASE=
 VITE_SENTRY_DSN=https://YOUR_SENTRY_COMPATIBLE_DSN
 VITE_SENTRY_TRACES_SAMPLE_RATE=0
 VITE_GA_MEASUREMENT_ID=
@@ -33,11 +34,20 @@ Do not place private API keys, collector credentials, Telegram bot tokens, or se
 
 1. Create a React project in Sentry, GlitchTip, or another compatible service.
 2. Configure its project DSN as `VITE_SENTRY_DSN`.
-3. Keep the trace sample rate at `0` until the production sampling and retention policy is approved.
-4. Grant monitoring consent in the application and verify one controlled test event.
-5. Revoke consent and verify that a new session does not send optional events.
+3. Configure `VITE_APP_RELEASE` with the deployed commit SHA when the platform does not expose
+   `CF_PAGES_COMMIT_SHA`, `GITHUB_SHA`, Easypanel's `GIT_SHA`, or `SOURCE_VERSION` during the build.
+4. Keep the trace sample rate at `0` until the production sampling and retention policy is approved.
+5. Grant monitoring consent in the application and verify one controlled exception.
+6. Revoke consent and verify that a new session does not send optional events.
 
-Project showcase events use the `Project metric:` prefix and the following tags:
+Revoking monitoring consent closes the active browser client and OpenTelemetry provider. Granting
+consent again initializes fresh clients without requiring a page reload.
+
+GlitchTip is reserved for actionable application exceptions. Web Vitals and project interactions
+must not use `captureMessage`, because that turns operational measurements into error issues and
+causes noisy Telegram alerts.
+
+Project showcase events are sent only to consented analytics using these event names:
 
 ```txt
 action=project_link_click
@@ -53,8 +63,9 @@ noise. Link clicks are captured for each intentional external navigation when co
 ## Web Vitals
 
 The app loads `web-vitals` after analytics or monitoring consent and observes CLS, FCP, INP, LCP,
-and TTFB. Metrics are delivered only to already-consented, configured providers. They must not be
-used to create sensitive profiles or be joined with unrelated personal data.
+and TTFB. Metrics are delivered to consented analytics and as OpenTelemetry spans when its collector
+is active. They do not create GlitchTip issues. They must not be used to create sensitive profiles
+or be joined with unrelated personal data.
 
 ## OpenTelemetry collector
 
@@ -88,6 +99,17 @@ https://api.telegram.org/botBOT_TOKEN/sendMessage?chat_id=CHAT_ID&text=New%20Lev
 
 The bot token must never appear in frontend code, GitHub, logs, or public documentation with a real
 value.
+
+Configure Telegram notifications only for new or regressed `error`/`fatal` issues and uptime
+failures. Exclude informational events, Web Vitals, analytics, and controlled test events. Keep one
+documented test alert, then resolve it immediately after verifying delivery.
+
+## Chunk-load recovery
+
+The app listens for Vite's `vite:preloadError` event. The first failure for a release and route is
+reported (when monitoring consent exists) and triggers one reload. A session marker prevents reload
+loops; a repeated failure reaches the React error boundary instead. Hashed assets must remain
+immutable while HTML must revalidate so that deployments do not keep referencing deleted chunks.
 
 ## Verification and incident response
 

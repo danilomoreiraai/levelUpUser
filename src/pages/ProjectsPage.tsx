@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import type { Project, ProjectPhase } from "@/data/projects";
 import { projects } from "@/data/projects";
-import { trackProjectMetric } from "@/lib/monitoring";
 import { usePageMetadata } from "@/lib/pageMetadata";
+import { trackProjectMetric } from "@/lib/tracking";
 import { routes } from "@/routes/routes";
 
 const projectSections: {
@@ -43,7 +43,6 @@ function ProjectPreview({ project }: { project: Project }) {
       phase: project.phase,
       projectTitle: project.title,
       status: project.status,
-      url: project.url,
     });
   }
 
@@ -87,7 +86,6 @@ function ProjectCard({ project }: { project: Project }) {
       phase: project.phase,
       projectTitle: project.title,
       status: project.status,
-      url: project.url,
     });
   }
 
@@ -97,7 +95,6 @@ function ProjectCard({ project }: { project: Project }) {
       phase: project.phase,
       projectTitle: project.title,
       status: project.status,
-      url: project.url,
     });
   }
 
@@ -196,7 +193,6 @@ function PipelineProjectCard({ project }: { project: Project }) {
       phase: project.phase,
       projectTitle: project.title,
       status: project.status,
-      url: project.url,
     });
   }
 

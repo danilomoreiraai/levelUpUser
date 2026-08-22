@@ -31,7 +31,7 @@ const preferenceOptions: {
   {
     category: "monitoring",
     label: "Optional monitoring",
-    description: "Reports errors and performance signals through Sentry.",
+    description: "Reports application errors through GlitchTip-compatible monitoring.",
   },
 ];
 

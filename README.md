@@ -67,6 +67,7 @@ Copy `.env.example` and configure only the services used by the deployment:
 
 ```txt
 VITE_APP_ENV=production
+VITE_APP_RELEASE=
 VITE_SENTRY_DSN=
 VITE_SENTRY_TRACES_SAMPLE_RATE=0
 VITE_GA_MEASUREMENT_ID=
@@ -77,12 +78,15 @@ VITE_OTEL_EXPORTER_OTLP_ENDPOINT=
 
 Vite embeds `VITE_*` values at build time. Never commit real secrets, private collector credentials,
 or access tokens. Google Analytics and Meta Pixel identifiers are inactive until matching consent is
-granted. OpenTelemetry browser export must target a secure, CORS-restricted collector endpoint.
+granted. OpenTelemetry browser export must target a secure, CORS-restricted collector endpoint. The
+build resolves its release from `VITE_APP_RELEASE`, Cloudflare Pages, GitHub Actions, Easypanel's
+`GIT_SHA`, or the buildpack `SOURCE_VERSION`, in that order.
 
 ## Observability
 
 - Sentry-compatible error reporting is enabled only with monitoring consent and a configured DSN.
-- Web Vitals report CLS, FCP, INP, LCP, and TTFB to consented analytics/monitoring providers.
+- Web Vitals report CLS, FCP, INP, LCP, and TTFB to consented analytics/OpenTelemetry providers
+  without creating error issues.
 - OpenTelemetry exports browser spans only with monitoring consent and a configured OTLP endpoint.
 - Revoking monitoring consent shuts down the browser tracer provider for the current session.
 
@@ -107,8 +111,24 @@ Port: 3000
 ```
 
 Configure `EASYPANEL_DEPLOY_WEBHOOK_URL` as a GitHub Actions secret to enable automatic rebuilds.
-Rollback by reverting the merged pull request on `main`, allowing CI to pass, and redeploying that
-known-good revision.
+Configure `PRODUCTION_HEALTHCHECK_URL` to make the workflow wait until `/release.json` exposes the
+expected commit SHA. The workflow no longer restarts the application or Traefik after an arbitrary
+delay; Easypanel owns the rollout and the health check verifies its result. Rollback by reverting the
+merged pull request on `main`, allowing CI to pass, and redeploying that known-good revision.
+
+The current static server returns one-year immutable caching for Vite's hashed `/assets/*`, no-store
+for release metadata, and revalidation for SPA HTML. Missing assets return 404 instead of the HTML
+fallback. This prevents browsers from interpreting an HTML fallback as a JavaScript module.
+
+For the lowest cold-start latency, deploy the same build to Cloudflare Pages with build command
+`npm run build` and output directory `dist`. The committed `public/_headers` file applies the same
+cache policy on Pages. Pages' default SPA routing preserves direct navigation, while
+`public/assets/404.html` prevents missing hashed chunks from being rewritten to `index.html`.
+Validate the preview deployment, environment variables, consent flows, custom domain, and rollback
+before removing the Easypanel service.
+
+The production build enforces a 120 KiB gzip budget for the entry JavaScript bundle. Override
+`MAX_ENTRY_GZIP_BYTES` only for an investigated, documented exception.
 
 ## Project structure
 
