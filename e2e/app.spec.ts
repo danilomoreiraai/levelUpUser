@@ -3,6 +3,9 @@ import { expect, test } from "@playwright/test";
 test("navigates between lazy-loaded routes", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /LevelUp User/ })).toBeVisible();
+  const portrait = page.getByRole("img", { name: "Danilo Moreira", exact: true });
+  await expect(portrait).toBeVisible();
+  await expect(portrait).toHaveJSProperty("naturalWidth", 1122);
 
   await page.getByRole("button", { name: "Reject optional" }).click();
   await page.getByRole("link", { name: "Projects", exact: true }).click();
