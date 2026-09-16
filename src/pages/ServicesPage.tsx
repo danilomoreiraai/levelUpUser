@@ -10,6 +10,18 @@ type Service = {
 
 const services: Service[] = [
   {
+    name: "Personalized Link Page",
+    description:
+      "A custom page for your brand, bringing your links, services, and social profiles together.",
+    icon: (
+      <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
+        <rect height="20" rx="3" stroke="currentColor" strokeWidth="1.8" width="14" x="5" y="2" />
+        <circle cx="12" cy="7" r="2" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M9 13h6m-6 4h6" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+      </svg>
+    ),
+  },
+  {
     name: "URL Shortener",
     description: "Create compact, shareable links that are easy to manage and remember.",
     icon: (
@@ -63,7 +75,7 @@ export function ServicesPage() {
   usePageMetadata({
     title: "Services | LevelUp User",
     description:
-      "Discover simple tools from LevelUp User, including URL shortening and QR code generation.",
+      "Discover simple tools from LevelUp User, including personalized link pages, URL shortening, and QR code generation.",
   });
 
   return (
@@ -75,14 +87,14 @@ export function ServicesPage() {
             Simple tools for everyday tasks.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
-            Useful services are on the way. We are starting with URL shortening and QR code
-            generation, with more tools to follow.
+            Useful services are on the way, including personalized link pages, URL shortening, and
+            QR code generation.
           </p>
         </header>
 
         <section
           aria-label="Upcoming services"
-          className="mt-12 grid gap-5 sm:grid-cols-2 sm:gap-6"
+          className="mt-12 grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
         >
           {services.map((service) => (
             <ServiceCard key={service.name} {...service} />
