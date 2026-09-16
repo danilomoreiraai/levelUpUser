@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 
-import { AvatarPlaceholder } from "@/components/avatar/AvatarPlaceholder";
+import { ProfilePhoto } from "@/components/avatar/ProfilePhoto";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/Button";
 import { usePageMetadata } from "@/lib/pageMetadata";
@@ -9,7 +9,7 @@ import { routes } from "@/routes/routes";
 /**
  * Landing / cover page.
  *
- * Single-page entry point: title, avatar placeholder, primary CTA -> /projects.
+ * Single-page entry point: title, profile photo, primary CTA -> /projects.
  * Routing is centralized in `routes/routes.ts` to avoid magic strings.
  */
 export function HomePage() {
@@ -35,7 +35,7 @@ export function HomePage() {
         </h1>
       </header>
 
-      <AvatarPlaceholder />
+      <ProfilePhoto />
 
       <Button
         onClick={() => navigate(routes.projects)}
