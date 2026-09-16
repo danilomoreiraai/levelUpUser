@@ -24,7 +24,15 @@ test("shows the upcoming services from the primary navigation", async ({ page })
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "URL Shortener" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "QR Code Generator" })).toBeVisible();
-  await expect(page.getByText("Coming soon", { exact: true })).toHaveCount(2);
+  await expect(page.getByRole("heading", { name: "Personalized Link Page" })).toBeVisible();
+  await expect(page.getByText("Coming soon", { exact: true })).toHaveCount(3);
+  await expect(page.locator("main form")).toHaveCount(0);
+  await expect(page.locator("main article")).toHaveCount(3);
+
+  await page.getByRole("link", { name: "Projects", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Delivered", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Juliana Linktree", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "LevelUp User", exact: true })).toBeVisible();
 });
 
 test("persists granular privacy choices", async ({ page }) => {

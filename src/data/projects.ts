@@ -33,16 +33,6 @@ export const projects: Project[] = [
     thumbnailUrl: "/projects/levelup-user.jpg",
   },
   {
-    title: "Juliana Linktree",
-    description:
-      "A lightweight link hub for Juliana Manduca's community, services, contact channels, and social presence.",
-    url: "https://link.julianamanduca.com.br",
-    phase: "delivered",
-    status: "Live",
-    tags: ["Link Hub", "Personal Brand", "HTML", "CSS", "JavaScript", "Responsive UI"],
-    thumbnailUrl: "/projects/juliana-linktree.jpg",
-  },
-  {
     title: "Juliana Manduca Astro Website",
     description:
       "A public website for astrological consultations, services, positioning, and client conversion.",
