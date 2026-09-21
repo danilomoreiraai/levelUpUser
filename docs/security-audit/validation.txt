@@ -1,0 +1,92 @@
+
+> levelup-user@0.1.0 validate
+> npm run lint && npm run quality && npm run test:coverage && npm run build
+
+
+> levelup-user@0.1.0 lint
+> eslint . && biome check .
+
+Checked 59 files in 15ms. No fixes applied.
+
+> levelup-user@0.1.0 quality
+> npm run quality:architecture && npm run quality:dead-code && npm run quality:security
+
+
+> levelup-user@0.1.0 quality:architecture
+> depcruise src --include-only '^src' --ts-config tsconfig.app.json
+
+
+✔ no dependency violations found (30 modules, 48 dependencies cruised)
+
+
+> levelup-user@0.1.0 quality:dead-code
+> knip
+
+
+> levelup-user@0.1.0 quality:security
+> npm audit --omit=dev
+
+found 0 vulnerabilities
+
+> levelup-user@0.1.0 test:coverage
+> vitest run --coverage
+
+9:17:30 PM [vite] warning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.
+9:17:30 PM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+Both esbuild and oxc options were set. oxc options will be used and esbuild options will be ignored. The following esbuild options were set: `{ jsx: 'automatic', jsxImportSource: undefined }`
+
+ RUN  v4.1.10 /Users/danilomoreira/Documents/Projects/levelUpUser
+      Coverage enabled with v8
+
+
+ Test Files  7 passed (7)
+      Tests  15 passed (15)
+   Start at  21:17:31
+   Duration  1.27s (transform 231ms, setup 1.20s, import 310ms, tests 283ms, environment 4.21s)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   92.64 |    86.11 |   91.66 |   95.08 |                   
+ ...onents/privacy |   96.29 |      100 |    92.3 |      96 |                   
+  ...entBanner.tsx |   96.29 |      100 |    92.3 |      96 | 151               
+ lib               |   90.24 |    82.14 |    90.9 |   94.44 |                   
+  ...acyConsent.ts |   90.24 |    82.14 |    90.9 |   94.44 | 90,101            
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 92.64% ( 63/68 )
+Branches     : 86.11% ( 31/36 )
+Functions    : 91.66% ( 22/24 )
+Lines        : 95.08% ( 58/61 )
+================================================================================
+
+> levelup-user@0.1.0 build
+> tsc -b && vite build && npm run quality:bundle
+
+vite v5.4.21 building for production...
+transforming...
+✓ 1034 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/release.json                             0.02 kB │ gzip:   0.04 kB
+dist/index.html                               1.81 kB │ gzip:   0.65 kB
+dist/assets/danilo-portrait-D3N3J8qt.png  1,921.11 kB
+dist/assets/index-CWxMhVs9.css               21.25 kB │ gzip:   4.88 kB
+dist/assets/pageMetadata-_re-qm2n.js          0.34 kB │ gzip:   0.25 kB
+dist/assets/NotFoundPage-B8b-xNng.js          0.91 kB │ gzip:   0.51 kB
+dist/assets/HomePage-BkSRAdY4.js              2.45 kB │ gzip:   1.14 kB
+dist/assets/ServicesPage-DdYnJt-9.js          3.38 kB │ gzip:   1.38 kB
+dist/assets/TermsPage-F71M4_nS.js             3.62 kB │ gzip:   1.61 kB
+dist/assets/PrivacyPage-AeDEm8lR.js           5.79 kB │ gzip:   2.44 kB
+dist/assets/ProjectsPage-DC4h7wOU.js          8.49 kB │ gzip:   2.64 kB
+dist/assets/web-vitals-CLs7hPwd.js            9.60 kB │ gzip:   3.58 kB
+dist/assets/liquidGL-80haAdQ5.js             70.25 kB │ gzip:  22.58 kB
+dist/assets/index-CGu8Clg4.js               323.42 kB │ gzip: 106.17 kB
+✓ built in 1.53s
+
+> levelup-user@0.1.0 quality:bundle
+> node scripts/check-bundle.mjs
+
+Entry bundle: 323421 bytes raw, 106172 bytes gzip

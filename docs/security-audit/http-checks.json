@@ -1,0 +1,74 @@
+[
+  {
+    "method": "GET",
+    "path": "/",
+    "expected": 200,
+    "actual": 200,
+    "pass": true,
+    "payload_reflected": false
+  },
+  {
+    "method": "HEAD",
+    "path": "/",
+    "expected": 200,
+    "actual": 200,
+    "pass": true,
+    "payload_reflected": false
+  },
+  {
+    "method": "POST",
+    "path": "/links",
+    "expected": 405,
+    "actual": 405,
+    "pass": true,
+    "payload_reflected": false
+  },
+  {
+    "method": "PATCH",
+    "path": "/links/example/access",
+    "expected": 405,
+    "actual": 405,
+    "pass": true,
+    "payload_reflected": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/links/example",
+    "expected": 405,
+    "actual": 405,
+    "pass": true,
+    "payload_reflected": false
+  },
+  {
+    "method": "GET",
+    "path": "/assets/missing.js",
+    "expected": 404,
+    "actual": 404,
+    "pass": true,
+    "payload_reflected": false
+  },
+  {
+    "method": "GET",
+    "path": "/%2e%2e%2fpackage.json",
+    "expected": 400,
+    "actual": 400,
+    "pass": true,
+    "payload_reflected": false
+  },
+  {
+    "method": "GET",
+    "path": "/%ZZ",
+    "expected": 404,
+    "actual": 404,
+    "pass": true,
+    "payload_reflected": false
+  },
+  {
+    "method": "GET",
+    "path": "/unknown?x=%3Cscript%3Ealert(1)%3C/script%3E",
+    "expected": 200,
+    "actual": 200,
+    "pass": true,
+    "payload_reflected": false
+  }
+]

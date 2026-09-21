@@ -1,0 +1,470 @@
+[
+  {
+    "file": ".dependency-cruiser.mjs",
+    "lines": 24,
+    "sha256": "a522ffb2dfd02ee3ccd444aaee75f3a363e7576e02dab163c34897e62eaeacd6",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": ".env.example",
+    "lines": 8,
+    "sha256": "8c14a432d7e3b9fb2169636d75c8a3523ad0307c17fb6b667341370fb73417e2",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": ".github/ISSUE_TEMPLATE/bug.yml",
+    "lines": 40,
+    "sha256": "987a71a02efa7782ccd6ac690f4c5fe675e1e110c5539a58baf283a83cee5996",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": ".github/ISSUE_TEMPLATE/feature.yml",
+    "lines": 37,
+    "sha256": "2156858117b71eb35c5392a5271c5d981dd1ad5f6ce51737846d9fdf0b11ac26",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": ".github/pull_request_template.md",
+    "lines": 32,
+    "sha256": "c181c7e210dd2a549fb168d8ee4d3ba01d6b2b654cefef6f692e286ecd12acf3",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": ".github/workflows/ci.yml",
+    "lines": 98,
+    "sha256": "e94e61059558c7d01565471c50329de228a71478c04ef94dff72d8d9447641bf",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": ".github/workflows/deploy.yml",
+    "lines": 61,
+    "sha256": "00b6bac9ea62652cd373d7dbde32aa0e22951fc973054a6c6656b080a995125f",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": ".gitignore",
+    "lines": 34,
+    "sha256": "e6c89394a688285df2c4b4e4600d1a79e5de59081da33d1ee1ac29d97aac8489",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "AGENTS.md",
+    "lines": 56,
+    "sha256": "22296f4ba32e905439736752067edcbddd330dc4f8f861bd74ce97c8e3d6435c",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "Procfile",
+    "lines": 1,
+    "sha256": "906c0de1097adbf5f1b72dc770717692c80dfde4de284364b43ccf24096fc33c",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "README.md",
+    "lines": 147,
+    "sha256": "a4010dfd4c444a9ea90bd3437d50cdf41b5692c0980c1c4e04429123f40c4539",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "biome.json",
+    "lines": 34,
+    "sha256": "a129f3b90ae216e3286cff82740b686aa4e9456b41f82904035aa007b9bb222b",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "build/releaseEnvironment.test.ts",
+    "lines": 25,
+    "sha256": "750e192c60e5f185cdbcbb38b2268be8c8882c094f75593854be2c8d88049985",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "build/releaseEnvironment.ts",
+    "lines": 19,
+    "sha256": "3243fdf26de29fbdf832cecfb9f348c10c271c07b039474490df9da266853b45",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "build/staticHosting.test.ts",
+    "lines": 14,
+    "sha256": "c4340633cbeed036a6e5fd7f3c0880b2006d63a847819bf8d445206967e9a0f3",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "commitlint.config.mjs",
+    "lines": 3,
+    "sha256": "101001638e174a3b7e9b426ae05db040fa10d04c85d3b01924d9193be16ca27e",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "docs/monitoring.md",
+    "lines": 124,
+    "sha256": "a270b7967f96fec6d8d8a177e1e7b52f3f92a6570d8a02fe7d88f3d3a54b6611",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "docs/superpowers/plans/2026-05-03-sentry-monitoring.md",
+    "lines": 150,
+    "sha256": "0c43eb4176bb4a748884c8a8016c7a820c0768d14ca2e2f6fbf29c2da52be627",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "e2e/app.spec.ts",
+    "lines": 72,
+    "sha256": "e1dbf82b25b3b803b3cf0017d615d8ec47d550cf7713eff0337560ac2c4a1c32",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "e2e/liquid-glass.spec.ts",
+    "lines": 152,
+    "sha256": "b198535cd6e73a204f00820e3813c6e3dbcebfcd6d495320ccea0f74f1741147",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "eslint.config.js",
+    "lines": 33,
+    "sha256": "ebb37140f92be24b61f719417fc656d331cee6335e9cfbf2dffc6de339ecfc21",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "index.html",
+    "lines": 45,
+    "sha256": "dc2a591edd3da6169f1fc6e1ac5785e137ce0374cb90330da0695e660be3ca86",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "package-lock.json",
+    "lines": 11085,
+    "sha256": "cc61f1c7822dc3227965159abd8632b86ebbedc32bbbbee9592ad8c0558ceeeb",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "package.json",
+    "lines": 74,
+    "sha256": "06d2c4e1c1cec1a58967a35d109df3f6f746fad165edf842b8e0562629e1667d",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "playwright.config.ts",
+    "lines": 35,
+    "sha256": "8d82547ed92d9c3b121e7b7867ba79413fd510f1cdbd055276fb10118ebf3510",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "postcss.config.js",
+    "lines": 6,
+    "sha256": "e32657baf631d7c5f4dc67b4b2ee0ec8e7d5b3c41860e09cddce7c0377cd80bc",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "public/_headers",
+    "lines": 9,
+    "sha256": "0dc7ee941fc35d3ae0154f62c25dff1db300408a673c73176e5e078aacdcda3a",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "public/assets/404.html",
+    "lines": 11,
+    "sha256": "4f2a40b17c41d7d68c1debc193fde1b42181c021f5f17caab6288100955d7eb3",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "public/favicon.svg",
+    "lines": 4,
+    "sha256": "baca97a356b50ac8a66eabd000f805928920ac33d75b8e0bf809589856a8eaf2",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "public/projects/juliana-linktree.jpg",
+    "lines": null,
+    "sha256": "f6b6f64f434b235b28c2cc9f2642b43067faffe787420c972255621841e602b4",
+    "review": "Ativo binário; inventário/hash"
+  },
+  {
+    "file": "public/projects/levelup-user.jpg",
+    "lines": null,
+    "sha256": "07e3f39949bf00d6880e33315c8361e3fe49e04d56122deee923ce83fab77e2f",
+    "review": "Ativo binário; inventário/hash"
+  },
+  {
+    "file": "public/robots.txt",
+    "lines": 4,
+    "sha256": "56b3f7490f1ec278b33c18f339b4ac6f4f1a704bac0d55986f24fdc1b2341816",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "public/sitemap.xml",
+    "lines": 23,
+    "sha256": "362f184449534b0ec229e1656dbfce5b0d7ba63d4a20f34796f70a2d720a4090",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "scripts/check-bundle.mjs",
+    "lines": 22,
+    "sha256": "8911267e18cf302e1214dabe0c1af78df6e49b7cc85c0c0b4364ac554304cdca",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "scripts/serve.mjs",
+    "lines": 137,
+    "sha256": "825e4768caa8f483aaa5da2c4b174cdfcf6dba79a473201142c0650f9f9a92f1",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/app/App.tsx",
+    "lines": 79,
+    "sha256": "8ef056a7bfe5e3ef25e0798e3ba13a74ab0f3dc061cae696e1ab6b50f5a95a13",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/assets/danilo-portrait.png",
+    "lines": null,
+    "sha256": "cf18dded59adb5093b98e81d3f33865ba2c5ca8cccc131719af01ac9472fac5e",
+    "review": "Ativo binário; inventário/hash"
+  },
+  {
+    "file": "src/components/avatar/ProfilePhoto.test.tsx",
+    "lines": 14,
+    "sha256": "5e76cd36dc0ab6e46af193eb0f3d23896711fae48a46183baf23cbb934aad540",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/components/avatar/ProfilePhoto.tsx",
+    "lines": 16,
+    "sha256": "3f49a825665c8cb00e0960f444f3a70f40d82c9c7e080abcf94b46a3bde5f900",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/components/effects/LiquidGlassNavigation.tsx",
+    "lines": 86,
+    "sha256": "cc733789ac4b8d93e8aeafe35b96ebed3ad29badc8ddeca27d9fe1943d2b0a26",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/components/feedback/ProductionErrorBoundary.tsx",
+    "lines": 46,
+    "sha256": "04232f1a2941e71358cd20ef7b8f076a9c9de0814ef28002c733ed9c2d95bcfd",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/components/feedback/RouteLoadingState.tsx",
+    "lines": 31,
+    "sha256": "c3177a08f5727ff7a90a994da4f79ff73143ac0ed0617e0578544d9ea8a2866b",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/components/feedback/Skeleton.tsx",
+    "lines": 18,
+    "sha256": "e38b34450c8fafd8590b358f03d61d9070f128aae52807d47d0818ada93b9da5",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/components/layout/PageContainer.tsx",
+    "lines": 24,
+    "sha256": "7828b46e92ca46035e8ceabbb86a723166efcbc71785ec08f7522dc67141b6a1",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/components/privacy/CookieConsentBanner.test.tsx",
+    "lines": 42,
+    "sha256": "c7dc1f88af49d11b5e5ac22ee7771261ab620c8b02ea6a3f25113b0c4bdebcdd",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/components/privacy/CookieConsentBanner.tsx",
+    "lines": 160,
+    "sha256": "68b37846fce93efa38054158434e3809036a4a3fab99b24b53c11e5ce9046735",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/components/ui/Button.tsx",
+    "lines": 36,
+    "sha256": "5c660d41f59457eca7f279aa32862961192ea06cd0eb3eb2072b5f294e95498c",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/data/projects.ts",
+    "lines": 71,
+    "sha256": "ed59ab9c3670fc733f088960b28f0a92e3b823cf23a265655d3e0c03dbb44f13",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/chunkRecovery.test.ts",
+    "lines": 41,
+    "sha256": "b6deed269eeacc2e237120c88e448d2ff9721533ad4359ef7d6e5f2778ac39c7",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/chunkRecovery.ts",
+    "lines": 69,
+    "sha256": "05fe573e3b3bc498ce29b7a584a45c026a6488506e75e6b2c26af549728527f1",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/liquidGlass.ts",
+    "lines": 136,
+    "sha256": "55581f0dd878e1ce902f8121974281d43493b84340752ff2ca6ad512a441fbed",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/monitoring.ts",
+    "lines": 91,
+    "sha256": "0e55379bf68c1a6c90258906fc3fbf3aa9e6ed1b5783c31482a04771fbc452d8",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/pageMetadata.ts",
+    "lines": 28,
+    "sha256": "d168c32907462a901f9463359a216b58e00a9e98e6be00f2e84eaa15bfd13c90",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/privacyConsent.test.ts",
+    "lines": 63,
+    "sha256": "5d82b61c82bdd4452a0110471d3985fe8bdb5864553c8fd2af072a4490a3fd00",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/privacyConsent.ts",
+    "lines": 125,
+    "sha256": "7f62ff6c757728c465fe6837284c4e8e56050195e50578df266d7c03d5906d4c",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/release.ts",
+    "lines": 2,
+    "sha256": "8198a2d3475b868d496cfd20e08257f31362bcecb6139a8a0fa2ef1d4b95ade8",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/telemetry.ts",
+    "lines": 118,
+    "sha256": "05201c670105e01caa8560bffcc9f34a244a44a05a38cb5530c2116eb76a73ec",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/tracking.test.ts",
+    "lines": 55,
+    "sha256": "77689c1b081cecd9075ec3c1e9e0212103b73fc86a8cc76f1f776c9cbdcea856",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/lib/tracking.ts",
+    "lines": 141,
+    "sha256": "262fca1f75d02e7a3f477315bb9939ea05bcf9a554159eac75fb2036b42dd8b8",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/main.tsx",
+    "lines": 30,
+    "sha256": "80299fca90a8abd4d68da2849342491f52fb11c3849079ae33f9efed29ede6d5",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/pages/HomePage.tsx",
+    "lines": 58,
+    "sha256": "01ea99cdefe8666975b43f06fe7959f054ba480808b1e222b07f03c6650accb9",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/pages/NotFoundPage.tsx",
+    "lines": 31,
+    "sha256": "59334f45743e49d2967a125ecd9c163ce6c010eb7fb1a8b3a89c7712a9041a10",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/pages/PrivacyPage.tsx",
+    "lines": 110,
+    "sha256": "9607afca62e70d2db9d19e815ccf1f46162339c247d569bb19bbf711ff3daed2",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/pages/ProjectsPage.tsx",
+    "lines": 317,
+    "sha256": "4a3b7eb911e1bb1270954a0e42c92296ff34786da6f1d4605bbe631be66bc2c2",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/pages/ServicesPage.tsx",
+    "lines": 110,
+    "sha256": "470e9f0a5b5f253135a5d6c1453aff250024223d99efe4d46ca77c0aeb00d1f2",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/pages/TermsPage.tsx",
+    "lines": 85,
+    "sha256": "d4d2f8730a2567664b34433fb09c053c6f734ed50d6ca4618683b17544749f83",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/routes/routes.ts",
+    "lines": 13,
+    "sha256": "e7cdd97367e623de78aa5f46be2b7aae40372663bde3b4f96f9080d7148af3da",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/styles/globals.css",
+    "lines": 69,
+    "sha256": "09a979541ffc6a994da7f0d6022188f28ec0a99cfc8c66c62c4b28894a25dfca",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/test/setup.ts",
+    "lines": 19,
+    "sha256": "7251ae2ed53cb4c9e04b52394fac55184ad50b97c612c1ecef872f3d5046e70e",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/types/liquid-gl.d.ts",
+    "lines": 44,
+    "sha256": "a4478d4d22d6fab1437b638396449c86697f69a44c2b076316a362efc7e6ba6b",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "src/vite-env.d.ts",
+    "lines": 24,
+    "sha256": "7fb97826b1c9ce67c918051e04025046b98a09d938531b072c834a43c2a7bb63",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "stryker.config.mjs",
+    "lines": 14,
+    "sha256": "1ecec4d00bed5a685ac34ccc5a83b799316c979fcf6fe8f19c2b1b92f9bb5175",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "tailwind.config.js",
+    "lines": 31,
+    "sha256": "d5a88e1d663cbba1d20313aabe3975c73343bc08fdc23e0dd819a11a1a512252",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "tsconfig.app.json",
+    "lines": 25,
+    "sha256": "ca2c14322988d42c401854ebbbb55ae060fa1bc5d0091f899505591c79d70c80",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "tsconfig.json",
+    "lines": 4,
+    "sha256": "e8d6f7b50828db3953e21c7e92584f9206b3cd2551b4012507372afbb7fe9ce3",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "tsconfig.node.json",
+    "lines": 18,
+    "sha256": "4a1878788eae7cde513396f8c0f7150218fa1ba6c8bfb123ef6fbaec649f1325",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "vite.config.ts",
+    "lines": 32,
+    "sha256": "9edc972d9b058e6ad17e7948a902b10f948f6ac2cdecbc19056d440b5309956e",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  },
+  {
+    "file": "vitest.config.ts",
+    "lines": 29,
+    "sha256": "87c0407ae23c91b3266f31dd920cf5e410eb2376f0e093747a8aa912c069274d",
+    "review": "Busca de segredos; leitura dos fluxos relevantes"
+  }
+]

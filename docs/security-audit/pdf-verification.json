@@ -1,0 +1,61 @@
+{
+  "pages": 8,
+  "page_details": [
+    {
+      "page": 1,
+      "width": 595.2755737304688,
+      "height": 841.8897705078125,
+      "text_characters": 1171,
+      "images": 0
+    },
+    {
+      "page": 2,
+      "width": 595.2755737304688,
+      "height": 841.8897705078125,
+      "text_characters": 1044,
+      "images": 1
+    },
+    {
+      "page": 3,
+      "width": 595.2755737304688,
+      "height": 841.8897705078125,
+      "text_characters": 1693,
+      "images": 0
+    },
+    {
+      "page": 4,
+      "width": 595.2755737304688,
+      "height": 841.8897705078125,
+      "text_characters": 1673,
+      "images": 0
+    },
+    {
+      "page": 5,
+      "width": 595.2755737304688,
+      "height": 841.8897705078125,
+      "text_characters": 2067,
+      "images": 0
+    },
+    {
+      "page": 6,
+      "width": 595.2755737304688,
+      "height": 841.8897705078125,
+      "text_characters": 2568,
+      "images": 0
+    },
+    {
+      "page": 7,
+      "width": 595.2755737304688,
+      "height": 841.8897705078125,
+      "text_characters": 2026,
+      "images": 0
+    },
+    {
+      "page": 8,
+      "width": 595.2755737304688,
+      "height": 841.8897705078125,
+      "text_characters": 886,
+      "images": 0
+    }
+  ]
+}
