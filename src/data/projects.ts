@@ -33,6 +33,15 @@ export const projects: Project[] = [
     thumbnailUrl: "/projects/levelup-user.jpg",
   },
   {
+    title: "Skip The Trip",
+    description:
+      "A mobile-first product for checking and sharing real-time bathroom availability before making the trip.",
+    url: "https://skipthetrip.info",
+    phase: "inProgress",
+    status: "In progress",
+    tags: ["Mobile Web App", "Real-time", "Accessibility", "React", "TypeScript"],
+  },
+  {
     title: "Juliana Manduca Astro Website",
     description:
       "A public website for astrological consultations, services, positioning, and client conversion.",
