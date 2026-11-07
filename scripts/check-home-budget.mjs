@@ -1,13 +1,11 @@
 import { existsSync, readFileSync, rmSync, statSync } from "node:fs";
 import { extname, resolve } from "node:path";
-import { gzipSync } from "node:zlib";
+import { fontAllowanceBytes, homeBudgetBytes, normalizedBodyBytes } from "./home-budget.mjs";
 
 const dist = resolve("dist");
 const manifestPath = resolve(dist, ".vite/manifest.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 const portraitBudget = 30 * 1024;
-const homeBudget = 300 * 1024;
-const fontAllowance = 64 * 1024;
 const textExtensions = new Set([".html", ".css", ".js", ".json", ".svg"]);
 const portraitFiles = Object.entries(manifest)
   .filter(([source]) => /^src\/assets\/danilo-portrait[.-]/.test(source))
@@ -52,24 +50,24 @@ function collectChunk(key, includeDynamicImports = false) {
 
 collectChunk("index.html");
 collectChunk("src/pages/HomePage.tsx", true);
-const glassChunk = "node_modules/liquid-gl/liquidGL.js";
-if (manifest[glassChunk]) collectChunk(glassChunk);
+const glassChunk = Object.keys(manifest).find((key) => key.endsWith("/liquid-gl/liquidGL.js"));
+if (glassChunk) collectChunk(glassChunk);
 
 // A browser downloads one portrait candidate. Reserve the largest for all devices.
 for (const portrait of portraitFiles) homeFiles.delete(portrait);
 
-let homeBytes = largestPortrait + fontAllowance;
+let homeBytes = largestPortrait + fontAllowanceBytes;
 for (const file of homeFiles) {
   const contents = readFileSync(resolve(dist, file));
-  homeBytes += textExtensions.has(extname(file))
-    ? gzipSync(contents).byteLength
-    : contents.byteLength;
+  homeBytes += normalizedBodyBytes(contents, textExtensions.has(extname(file)));
 }
 
 console.log(`Largest portrait: ${largestPortrait} / ${portraitBudget} bytes`);
-console.log(`Normalized cold home: ${homeBytes} / ${homeBudget} bytes (includes font allowance)`);
-if (homeBytes > homeBudget) {
-  throw new Error(`Normalized cold home exceeds budget: ${homeBytes} > ${homeBudget} bytes`);
+console.log(
+  `Normalized cold home: ${homeBytes} / ${homeBudgetBytes} bytes (includes font allowance)`,
+);
+if (homeBytes > homeBudgetBytes) {
+  throw new Error(`Normalized cold home exceeds budget: ${homeBytes} > ${homeBudgetBytes} bytes`);
 }
 
 rmSync(manifestPath);
