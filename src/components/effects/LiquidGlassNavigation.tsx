@@ -63,7 +63,7 @@ export function LiquidGlassNavigation() {
 
   return (
     <div
-      className="fixed right-4 top-4 z-40 rounded-full bg-white/25 p-1.5 sm:right-6 sm:top-6"
+      className="fixed right-4 top-4 z-40 rounded-full bg-white/80 p-1.5 shadow-sm backdrop-blur-md sm:right-6 sm:top-6"
       id={TARGET_ID}
       ref={targetRef}
     >
