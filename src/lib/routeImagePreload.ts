@@ -16,7 +16,8 @@ export function preloadRouteImage(pathname: string) {
     if (route === routes.home) {
       link.imageSrcset = portraitImage.srcSet;
     } else {
-      link.href = featuredProjectImage.src;
+      link.imageSrcset = featuredProjectImage.srcSet;
+      link.imageSizes = featuredProjectImage.sizes;
       link.media = featuredProjectImage.media;
     }
     document.head.append(link);

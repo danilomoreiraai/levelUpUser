@@ -48,7 +48,7 @@ export function routeImagePreloads(): Plugin {
           {
             fileName: ".route-preloads/projects.html",
             page: "ProjectsPage",
-            link: `<link rel="preload" as="image" href="${featuredProjectImage.src}" media="${featuredProjectImage.media}" fetchpriority="high" data-route-image="${routes.projects}">`,
+            link: `<link rel="preload" as="image" imagesrcset="${featuredProjectImage.srcSet}" imagesizes="${featuredProjectImage.sizes}" media="${featuredProjectImage.media}" fetchpriority="high" data-route-image="${routes.projects}">`,
           },
         ];
         for (const { fileName, page, link } of documents) {

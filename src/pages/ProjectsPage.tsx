@@ -73,6 +73,8 @@ function ProjectPreview({ project }: { project: Project }) {
               trackThumbnailError();
             }}
             onLoad={() => setStatus("loaded")}
+            sizes={isFeatured ? featuredProjectImage.sizes : undefined}
+            srcSet={isFeatured ? featuredProjectImage.srcSet : undefined}
             src={project.thumbnailUrl}
             width="1200"
           />
