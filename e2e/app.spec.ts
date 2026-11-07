@@ -1,11 +1,26 @@
 import { expect, test } from "@playwright/test";
 
+test("serves a lightweight portrait at the device density", async ({ page, request }, testInfo) => {
+  await page.goto("/");
+  const portrait = page.getByRole("img", { name: "Danilo Moreira", exact: true });
+  await expect(portrait).toBeVisible();
+  await expect(portrait).toHaveCSS("width", "144px");
+  await expect(portrait).toHaveCSS("height", "144px");
+  await expect(portrait).toHaveJSProperty("naturalWidth", 144);
+
+  const density = Math.min(3, Math.ceil(testInfo.project.use.deviceScaleFactor ?? 1));
+  const selectedImage = await portrait.evaluate((image: HTMLImageElement) => image.currentSrc);
+  expect(selectedImage).toContain(`/assets/danilo-portrait-${144 * density}-`);
+
+  const response = await request.get(selectedImage);
+  expect(response.ok()).toBe(true);
+  expect(response.headers()["content-type"]).toBe("image/webp");
+  expect((await response.body()).byteLength).toBeLessThanOrEqual(30 * 1024);
+});
+
 test("navigates between lazy-loaded routes", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /LevelUp User/ })).toBeVisible();
-  const portrait = page.getByRole("img", { name: "Danilo Moreira", exact: true });
-  await expect(portrait).toBeVisible();
-  await expect(portrait).toHaveJSProperty("naturalWidth", 1122);
 
   await page.getByRole("button", { name: "Reject optional" }).click();
   await page.getByRole("link", { name: "Projects", exact: true }).click();

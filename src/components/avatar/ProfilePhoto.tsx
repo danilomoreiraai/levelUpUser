@@ -1,9 +1,12 @@
-import portraitUrl from "@/assets/danilo-portrait.png";
+import portrait1x from "@/assets/danilo-portrait-144.webp";
+import portrait2x from "@/assets/danilo-portrait-288.webp";
+import portrait3x from "@/assets/danilo-portrait-432.webp";
 
 export function ProfilePhoto() {
   return (
     <img
-      src={portraitUrl}
+      src={portrait1x}
+      srcSet={`${portrait1x} 1x, ${portrait2x} 2x, ${portrait3x} 3x`}
       alt="Danilo Moreira"
       width={144}
       height={144}
