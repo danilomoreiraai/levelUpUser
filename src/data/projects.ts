@@ -1,3 +1,5 @@
+import { featuredProjectImage } from "@/routes/criticalImages";
+
 export type ProjectPhase = "delivered" | "inProgress";
 
 type ProjectStatus = "Live" | "In progress" | "Delivered" | "Planned";
@@ -30,7 +32,7 @@ export const projects: Project[] = [
       "React Router",
       "Sentry",
     ],
-    thumbnailUrl: "/projects/levelup-user.jpg",
+    thumbnailUrl: featuredProjectImage.src,
   },
   {
     title: "Skip The Trip",

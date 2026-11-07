@@ -6,6 +6,7 @@ import type { Project, ProjectPhase } from "@/data/projects";
 import { projects } from "@/data/projects";
 import { usePageMetadata } from "@/lib/pageMetadata";
 import { trackProjectMetric } from "@/lib/tracking";
+import { featuredProjectImage } from "@/routes/criticalImages";
 import { routes } from "@/routes/routes";
 
 const projectSections: {
@@ -35,7 +36,9 @@ function ProjectPlaceholder({ project }: { project: Project }) {
 }
 
 function ProjectPreview({ project }: { project: Project }) {
-  const [isLoading, setIsLoading] = useState(Boolean(project.thumbnailUrl));
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
+  const isFeatured = project.thumbnailUrl === featuredProjectImage.src;
+  const shouldPrioritize = isFeatured && window.matchMedia(featuredProjectImage.media).matches;
 
   function trackThumbnailError() {
     trackProjectMetric({
@@ -49,9 +52,9 @@ function ProjectPreview({ project }: { project: Project }) {
   return (
     <>
       <ProjectPlaceholder project={project} />
-      {project.thumbnailUrl ? (
+      {project.thumbnailUrl && status !== "error" ? (
         <>
-          {isLoading ? (
+          {status === "loading" ? (
             <Skeleton
               className="absolute inset-0 rounded-none"
               label={`Loading ${project.title} preview`}
@@ -59,17 +62,17 @@ function ProjectPreview({ project }: { project: Project }) {
           ) : null}
           <img
             alt={`${project.title} website thumbnail`}
-            className={`absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.02] ${
-              isLoading ? "opacity-0" : "opacity-100"
-            }`}
+            className={`absolute inset-0 h-full w-full object-cover duration-500 ease-out group-hover:scale-[1.02] ${
+              isFeatured ? "transition-transform" : "transition"
+            } ${status === "loading" ? "opacity-0" : "opacity-100"}`}
             decoding="async"
             height="675"
-            loading="lazy"
+            loading={shouldPrioritize ? "eager" : "lazy"}
             onError={() => {
-              setIsLoading(false);
+              setStatus("error");
               trackThumbnailError();
             }}
-            onLoad={() => setIsLoading(false)}
+            onLoad={() => setStatus("loaded")}
             src={project.thumbnailUrl}
             width="1200"
           />
