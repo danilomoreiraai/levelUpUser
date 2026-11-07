@@ -22,28 +22,28 @@ function waitForIdleTime() {
 }
 
 function shouldInitializeLiquidGlass() {
+  const usesMobileNavigation = window.matchMedia(
+    "(max-width: 767px), (hover: none) and (pointer: coarse)",
+  ).matches;
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hasLimitedCpu = navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 2;
 
-  return !prefersReducedMotion && !hasLimitedCpu;
+  return !usesMobileNavigation && !prefersReducedMotion && !hasLimitedCpu;
 }
 
 function createOptions(targetSelector: string): LiquidGLOptions {
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const isSmallViewport = window.matchMedia("(max-width: 767px)").matches;
-
   return {
     target: targetSelector,
     snapshot: "body",
-    resolution: isSmallViewport ? 1 : 1.5,
+    resolution: 1.5,
     refraction: 0.01,
     aberration: 0,
     bevelDepth: 0.052,
     bevelWidth: 0.211,
     frost: 1,
     shadow: true,
-    specular: !prefersReducedMotion,
-    reveal: prefersReducedMotion ? "none" : "fade",
+    specular: true,
+    reveal: "fade",
     tilt: false,
     magnify: 1,
   };
@@ -57,23 +57,22 @@ function createOptions(targetSelector: string): LiquidGLOptions {
  * StrictMode from creating a duplicate lens during development.
  */
 async function initializeTarget({ target, targetSelector }: InitializeLiquidGlassOptions) {
-  if (initializedTargets.has(target)) {
-    return;
-  }
+  const canInitialize = () =>
+    target.isConnected && !initializedTargets.has(target) && shouldInitializeLiquidGlass();
 
-  if (!shouldInitializeLiquidGlass()) {
+  if (!canInitialize()) {
     return;
   }
 
   await waitForIdleTime();
 
-  if (!target.isConnected || initializedTargets.has(target)) {
+  if (!canInitialize()) {
     return;
   }
 
   const { default: liquidGL } = await import("liquid-gl");
 
-  if (!target.isConnected || initializedTargets.has(target)) {
+  if (!canInitialize()) {
     return;
   }
 
@@ -118,13 +117,16 @@ export async function refreshLiquidGlassSnapshot(target: Element) {
     await pendingInitialization;
   }
 
-  if (!target.isConnected || !initializedTargets.has(target)) {
+  const canRefresh = () =>
+    target.isConnected && initializedTargets.has(target) && shouldInitializeLiquidGlass();
+
+  if (!canRefresh()) {
     return;
   }
 
   await waitForIdleTime();
 
-  if (!target.isConnected) {
+  if (!canRefresh()) {
     return;
   }
 
