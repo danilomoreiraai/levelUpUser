@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 import { resolveAppRelease } from "./build/releaseEnvironment";
+import { routeImagePreloads } from "./build/routeImagePreloads";
 
 const appRelease = resolveAppRelease(process.env);
 
@@ -13,6 +14,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    routeImagePreloads(),
     {
       name: "release-metadata",
       generateBundle() {

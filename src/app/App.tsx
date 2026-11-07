@@ -1,11 +1,12 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useLayoutEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 
 import { LiquidGlassNavigation } from "@/components/effects/LiquidGlassNavigation";
 import { ProductionErrorBoundary } from "@/components/feedback/ProductionErrorBoundary";
 import { RouteLoadingState } from "@/components/feedback/RouteLoadingState";
 import { CookieConsentBanner } from "@/components/privacy/CookieConsentBanner";
+import { preloadRouteImage } from "@/lib/routeImagePreload";
 import { routes } from "@/routes/routes";
 
 const HomePage = lazy(() =>
@@ -42,6 +43,8 @@ function AnimatedRoutes() {
   const prefersReducedMotion = useReducedMotion();
   const distance = prefersReducedMotion ? 0 : 12;
   const duration = prefersReducedMotion ? 0 : 0.24;
+
+  useLayoutEffect(() => preloadRouteImage(location.pathname), [location.pathname]);
 
   return (
     <AnimatePresence initial={false} mode="wait">

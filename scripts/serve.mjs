@@ -4,6 +4,11 @@ import { extname, resolve, sep } from "node:path";
 
 const distDirectory = resolve(process.cwd(), "dist");
 const fallbackFile = resolve(distDirectory, "index.html");
+const routeDocumentDirectory = resolve(distDirectory, ".route-preloads");
+const routeDocuments = new Map([
+  ["/", resolve(routeDocumentDirectory, "home.html")],
+  ["/projects", resolve(routeDocumentDirectory, "projects.html")],
+]);
 const releaseFile = resolve(distDirectory, "release.json");
 const port = Number(process.env.PORT ?? "3000");
 
@@ -56,6 +61,13 @@ function getRequestedFile(requestUrl) {
     return null;
   }
 
+  if (
+    requestedFile === routeDocumentDirectory ||
+    requestedFile.startsWith(`${routeDocumentDirectory}${sep}`)
+  ) {
+    return undefined;
+  }
+
   try {
     const stats = statSync(requestedFile);
     if (stats.isFile()) return { file: requestedFile, pathname, stats };
@@ -67,8 +79,13 @@ function getRequestedFile(requestUrl) {
     return undefined;
   }
 
-  const stats = statSync(fallbackFile);
-  return { file: fallbackFile, pathname, stats };
+  const route = pathname.replace(/\/+$/, "").toLowerCase() || "/";
+  const routeDocument = routeDocuments.get(route);
+  if (routeDocument) {
+    const stats = statSync(routeDocument, { throwIfNoEntry: false });
+    if (stats?.isFile()) return { file: routeDocument, pathname, stats };
+  }
+  return { file: fallbackFile, pathname, stats: statSync(fallbackFile) };
 }
 
 function sendResponse(request, response) {
