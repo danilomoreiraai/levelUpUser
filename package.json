@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && npm run quality:bundle",
+    "build": "tsc -b && vite build --manifest && npm run quality:bundle && node scripts/check-home-budget.mjs",
     "ci": "npm run validate",
     "start": "node scripts/serve.mjs",
     "preview": "vite preview --host 0.0.0.0",

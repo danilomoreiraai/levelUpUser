@@ -1,0 +1,70 @@
+name: Performance report
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: performance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: Mobile Lighthouse (report only)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PORT: "4173"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup application Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Build application
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Setup Lighthouse Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.20.0
+
+      - name: Install Lighthouse tools
+        run: >-
+          npm install --prefix "$RUNNER_TEMP/lighthouse" --no-save --no-audit --no-fund
+          lighthouse@13.6.0 chrome-launcher@1.2.3 puppeteer-core@25.16.0
+
+      - name: Measure the production build
+        env:
+          LIGHTHOUSE_INSTALL_DIR: ${{ runner.temp }}/lighthouse
+          PERFORMANCE_REPORT_DIR: ${{ runner.temp }}/performance-reports
+        run: |
+          node scripts/serve.mjs &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          curl --retry 10 --retry-connrefused --retry-delay 1 --fail --silent --show-error \
+            --output /dev/null "http://127.0.0.1:$PORT/release.json"
+          node scripts/measure-home.mjs
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: mobile-lighthouse
+          path: ${{ runner.temp }}/performance-reports
+          retention-days: 14

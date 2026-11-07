@@ -127,8 +127,20 @@ cache policy on Pages. Pages' default SPA routing preserves direct navigation, w
 Validate the preview deployment, environment variables, consent flows, custom domain, and rollback
 before removing the Easypanel service.
 
-The production build enforces a 120 KiB gzip budget for the entry JavaScript bundle. Override
+The production build enforces a 120 KiB gzip budget for the entry JavaScript bundle, 30 KiB for
+each portrait variant, and 300 KiB for the normalized cold homepage. Override
 `MAX_ENTRY_GZIP_BYTES` only for an investigated, documented exception.
+
+The homepage estimate follows the Vite entry and home-route chunks, includes the shared desktop
+glass chunk when present, and counts the largest portrait variant once. It uses gzip for text
+assets, actual file sizes for binary assets, and a fixed 64 KiB allowance for external fonts.
+The estimate covers response bodies and excludes optional telemetry that requires consent.
+
+The separate **Performance report** workflow uses the Chromium revision locked by Playwright and
+Lighthouse 13.6.0's default mobile simulation. It tests the local production build with external
+requests blocked and a cold cache, collecting three samples each for a first visit and a return
+visit with optional cookies rejected. The artifact contains the six reports and medians for LCP
+(2.5 s target), TBT (200 ms), and CLS (0.1). Timing targets are report-only.
 
 ## Project structure
 
