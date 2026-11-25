@@ -16,7 +16,7 @@ test("navigates between lazy-loaded routes", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("shows the upcoming services from the primary navigation", async ({ page }) => {
+test("opens each service from its keyboard-focusable card", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Reject optional" }).click();
   await page.getByRole("link", { name: "Services", exact: true }).click();
@@ -25,12 +25,33 @@ test("shows the upcoming services from the primary navigation", async ({ page })
   await expect(
     page.getByRole("heading", { name: "Simple tools for everyday tasks." }),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "URL Shortener" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "QR Code Generator" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Personalized Link Page" })).toBeVisible();
-  await expect(page.getByText("Coming soon", { exact: true })).toHaveCount(3);
-  await expect(page.locator("main form")).toHaveCount(0);
-  await expect(page.locator("main article")).toHaveCount(3);
+  await expect(page.getByText("Coming soon", { exact: true })).toHaveCount(2);
+
+  const destinations = [
+    { name: "Personalized Link Page", path: "/services/link-page" },
+    { name: "URL Shortener", path: "/services/url-shortener" },
+    { name: "QR Code Generator", path: "/services/qr-code" },
+  ];
+
+  for (const { name, path } of destinations) {
+    const card = page.getByRole("link", { name, exact: true });
+    await card.focus();
+    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press("Tab");
+    await expect(card).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(path);
+    await expect(page.getByRole("heading", { name, exact: true, level: 1 })).toBeVisible();
+    if (name !== "Personalized Link Page") {
+      await expect(page.getByText("Coming soon", { exact: true })).toBeVisible();
+    }
+    await page.getByRole("link", { name: "Back to Services", exact: true }).click();
+  }
+});
+
+test("keeps the link page in Services when viewing delivered projects", async ({ page }) => {
+  await page.goto("/services");
+  await page.getByRole("button", { name: "Reject optional" }).click();
 
   await page.getByRole("link", { name: "Projects", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Delivered", exact: true })).toBeVisible();

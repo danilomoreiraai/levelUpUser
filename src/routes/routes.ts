@@ -10,4 +10,7 @@ export const routes = {
   terms: "/terms",
   projects: "/projects",
   services: "/services",
+  linkPage: "/services/link-page",
+  urlShortener: "/services/url-shortener",
+  qrCode: "/services/qr-code",
 } as const;
