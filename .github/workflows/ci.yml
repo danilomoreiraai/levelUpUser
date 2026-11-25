@@ -96,3 +96,62 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+
+  personal-link:
+    name: Personal Link validation and browser tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/personal-link
+    env:
+      TEST_DATABASE_URL: postgresql://personal_link:personal_link_ci_only@127.0.0.1:5432/personal_link_test
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: personal_link
+          POSTGRES_PASSWORD: personal_link_ci_only
+          POSTGRES_DB: personal_link_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U personal_link -d personal_link_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/personal-link/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate application
+        run: npm run validate
+
+      - name: Run mutation tests
+        env:
+          TEST_DATABASE_URL: ""
+        run: npm run test:mutation
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: personal-link-playwright-report
+          path: apps/personal-link/playwright-report/
+          retention-days: 14

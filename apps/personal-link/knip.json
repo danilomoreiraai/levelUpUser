@@ -1,0 +1,8 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["src/server/index.ts", "src/server/hash-password.ts", "playwright.config.ts"],
+  "playwright": {
+    "config": [],
+    "entry": ["e2e/**/*.spec.ts"]
+  }
+}
