@@ -1,0 +1,47 @@
+{
+  "name": "levelup-personal-link",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "vite",
+    "start": "node --env-file-if-exists=.env dist/server/index.js",
+    "lint": "biome check .",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.server.json --noEmit",
+    "build": "vite build && tsc -p tsconfig.server.json",
+    "quality:security": "npm audit --omit=dev",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:mutation": "stryker run",
+    "validate": "npm run lint && npm run typecheck && npm run quality:dead-code && npm test && npm run quality:security && npm run build",
+    "quality:dead-code": "knip"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.1.5",
+    "@fastify/helmet": "13.2.0",
+    "@fastify/static": "10.1.12",
+    "fastify": "5.12.8",
+    "pg": "8.23.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.8",
+    "@playwright/test": "1.62.1",
+    "@stryker-mutator/core": "10.1.1",
+    "@stryker-mutator/vitest-runner": "10.1.1",
+    "@types/node": "24.19.4",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.3.3",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.3.0",
+    "knip": "6.32.2",
+    "typescript": "5.9.3",
+    "vite": "8.3.8",
+    "vitest": "4.1.12"
+  }
+}

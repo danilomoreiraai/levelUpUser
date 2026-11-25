@@ -94,27 +94,20 @@ Operational setup and security notes are in [`docs/monitoring.md`](docs/monitori
 
 ## Continuous integration and deployment
 
-GitHub Actions validates push and pull request commits, static analysis, unit/integration coverage,
-the production build, and Playwright journeys. The production workflow runs only after a successful
-`CI` workflow on `main` and then invokes the configured Easypanel webhook.
+GitHub Actions validates the portfolio and [Personal Link](apps/personal-link/README.md), including
+the production build and browser journeys. After a successful push CI run on `main`, **Release container
+images** publishes a commit-tagged image for each application and records the immutable digests
+in the job summary. A release requires manual promotion of the chosen digest in Coolify.
 
-Recommended Easypanel settings:
+The portfolio runs as a Compose service on port 3000. Record its existing image and settings
+before promotion, replace the portfolio image with the digest from the job summary, and deploy
+the service. Verify `/release.json` returns the expected commit and check the user-facing changes.
+For rollback, restore the previously recorded image reference in the same service.
 
-```txt
-Source: GitHub
-Repository: danilomoreiraai/levelUpUser
-Branch: main
-Build method: Buildpacks
-Builder: heroku/builder:24
-Start command: npm start
-Port: 3000
-```
-
-Configure `EASYPANEL_DEPLOY_WEBHOOK_URL` as a GitHub Actions secret to enable automatic rebuilds.
-Configure `PRODUCTION_HEALTHCHECK_URL` to make the workflow wait until `/release.json` exposes the
-expected commit SHA. The workflow no longer restarts the application or Traefik after an arbitrary
-delay; Easypanel owns the rollout and the health check verifies its result. Rollback by reverting the
-merged pull request on `main`, allowing CI to pass, and redeploying that known-good revision.
+Set any existing public Vite build settings as GitHub repository variables before building the
+site image. To activate the Personalized Link Page card, set `VITE_PERSONAL_LINK_ORIGIN` to the
+verified editor origin before the release run. The editor's database URL and administrator hash
+are runtime configuration in Coolify.
 
 The current static server returns one-year immutable caching for Vite's hashed `/assets/*`, no-store
 for release metadata, and revalidation for SPA HTML. Missing assets return 404 instead of the HTML
@@ -125,7 +118,7 @@ For the lowest cold-start latency, deploy the same build to Cloudflare Pages wit
 cache policy on Pages. Pages' default SPA routing preserves direct navigation, while
 `public/assets/404.html` prevents missing hashed chunks from being rewritten to `index.html`.
 Validate the preview deployment, environment variables, consent flows, custom domain, and rollback
-before removing the Easypanel service.
+before changing the active Coolify service.
 
 The production build enforces a 120 KiB gzip budget for the entry JavaScript bundle. Override
 `MAX_ENTRY_GZIP_BYTES` only for an investigated, documented exception.
