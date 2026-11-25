@@ -5,7 +5,16 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "node_modules"] },
+  {
+    ignores: [
+      "dist",
+      "node_modules",
+      "apps/personal-link/dist",
+      "apps/personal-link/.stryker-tmp",
+      "apps/personal-link/playwright-report",
+      "apps/personal-link/test-results",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
