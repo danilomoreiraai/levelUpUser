@@ -28,7 +28,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "npm run build && npm start",
-    env: { PORT: "4173" },
+    env: { PORT: "4173", VITE_PERSONAL_LINK_ORIGIN: "" },
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
   },

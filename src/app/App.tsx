@@ -31,6 +31,11 @@ const ServicesPage = lazy(() =>
     default: module.ServicesPage,
   })),
 );
+const ServiceDetailsPage = lazy(() =>
+  import("@/pages/ServiceDetailsPage").then((module) => ({
+    default: module.ServiceDetailsPage,
+  })),
+);
 const TermsPage = lazy(() =>
   import("@/pages/TermsPage").then((module) => ({
     default: module.TermsPage,
@@ -59,6 +64,12 @@ function AnimatedRoutes() {
             <Route path={routes.terms} element={<TermsPage />} />
             <Route path={routes.projects} element={<ProjectsPage />} />
             <Route path={routes.services} element={<ServicesPage />} />
+            <Route path={routes.linkPage} element={<ServiceDetailsPage serviceId="linkPage" />} />
+            <Route
+              path={routes.urlShortener}
+              element={<ServiceDetailsPage serviceId="urlShortener" />}
+            />
+            <Route path={routes.qrCode} element={<ServiceDetailsPage serviceId="qrCode" />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
