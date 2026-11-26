@@ -105,6 +105,7 @@ jobs:
         working-directory: apps/personal-link
     env:
       TEST_DATABASE_URL: postgresql://personal_link:personal_link_ci_only@127.0.0.1:5432/personal_link_test
+      VITE_LEVELUP_SITE_ORIGIN: https://levelupuser.com
     services:
       postgres:
         image: postgres:18-alpine

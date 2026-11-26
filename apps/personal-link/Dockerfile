@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+ARG VITE_LEVELUP_SITE_ORIGIN
 RUN npm run build && npm prune --omit=dev
 
 FROM node:24-bookworm-slim

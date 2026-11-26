@@ -203,7 +203,7 @@ export class Database {
   async createPage(slug: string): Promise<AdminPage> {
     const draft: Snapshot = {
       handle: slug,
-      preset: "neutral",
+      preset: "original",
       blur: 0,
       links: [],
       socials: [],

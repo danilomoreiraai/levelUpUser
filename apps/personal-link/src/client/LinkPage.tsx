@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 
 import type { Presentation } from "../shared/contracts";
 import type { LocalTheme } from "../shared/theme";
+import { originalArtwork, originalSocialIcons } from "./originalArtwork";
+import "./original-template.css";
 import { formatHandle, socialNames } from "./presentation";
 import { useLocalTheme } from "./useLocalTheme";
 
@@ -19,13 +21,18 @@ const socialIcons: Record<Platform, string> = {
   other: "↗",
 };
 
-function SocialLabel({ platform }: { platform: Platform }) {
+function SocialLabel({ original, platform }: { original: boolean; platform: Platform }) {
+  const icon =
+    original && (platform === "instagram" || platform === "youtube")
+      ? originalSocialIcons[platform]
+      : null;
+
   return (
     <>
       <span aria-hidden="true" className={`social-icon social-icon--${platform}`}>
-        {socialIcons[platform]}
+        {icon ? <img alt="" height={24} src={icon} width={24} /> : socialIcons[platform]}
       </span>
-      {socialNames[platform]}
+      <span className={original ? "visually-hidden" : undefined}>{socialNames[platform]}</span>
     </>
   );
 }
@@ -52,6 +59,12 @@ export function LinkPage({
   const toggle = useRef<HTMLButtonElement>(null);
   const theme = override ?? autoTheme;
   const targetTheme = theme === "dark" ? "light" : "dark";
+  const themeLabel = targetTheme === "dark" ? "Tema escuro" : "Tema claro";
+  const original = presentation.preset === "original";
+  const artwork = originalArtwork[theme];
+  const showExamplePortrait = original && preview && !presentation.avatarUrl;
+  const avatar = showExamplePortrait ? artwork.avatar : presentation.avatarUrl;
+  const backgroundStyle = { filter: `blur(${presentation.blur}px)` };
   const handle = formatHandle(presentation.handle);
   const Display = preview ? "section" : "main";
   const Title = preview ? "h3" : "h1";
@@ -63,25 +76,38 @@ export function LinkPage({
       data-preset={presentation.preset}
       aria-label={preview ? "Prévia da página de links" : undefined}
     >
-      {presentation.backgroundUrl && (
+      {presentation.backgroundUrl ? (
         <img
           className="link-background"
           src={presentation.backgroundUrl}
           alt=""
           aria-hidden="true"
           fetchPriority={preview ? "low" : undefined}
-          style={{ filter: `blur(${presentation.blur}px)` }}
+          style={backgroundStyle}
         />
+      ) : (
+        original && (
+          <picture className="original-background">
+            <source media="(min-width: 700px)" srcSet={artwork.desktop} />
+            <img
+              className="link-background"
+              src={artwork.mobile}
+              alt=""
+              fetchPriority={preview ? "low" : undefined}
+              style={backgroundStyle}
+            />
+          </picture>
+        )
       )}
       <div className="link-content">
         <div className="link-profile">
-          {presentation.avatarUrl ? (
+          {avatar ? (
             <img
               className="link-avatar"
-              src={presentation.avatarUrl}
-              alt=""
-              width={96}
-              height={96}
+              src={avatar}
+              alt={showExamplePortrait ? "Foto de exemplo do modelo" : ""}
+              width={original ? 112 : 96}
+              height={original ? 112 : 96}
             />
           ) : (
             <span className="link-avatar link-avatar--placeholder" aria-hidden="true">
@@ -93,13 +119,26 @@ export function LinkPage({
 
         <div className="link-theme">
           <button
-            className="theme-button"
+            aria-label={themeLabel}
+            className={original ? "theme-button original-theme-switch" : "theme-button"}
             onClick={() => setOverride(targetTheme)}
             ref={toggle}
             type="button"
           >
-            <span aria-hidden="true">{targetTheme === "dark" ? "☾" : "☀"}</span>
-            {targetTheme === "dark" ? "Tema escuro" : "Tema claro"}
+            {original ? (
+              <img
+                className="original-theme-knob"
+                alt=""
+                src={artwork.themeIcon}
+                width={32}
+                height={32}
+              />
+            ) : (
+              <>
+                <span aria-hidden="true">{targetTheme === "dark" ? "☾" : "☀"}</span>
+                {themeLabel}
+              </>
+            )}
           </button>
           {override && (
             <button
@@ -142,11 +181,11 @@ export function LinkPage({
                 <li key={key}>
                   {preview ? (
                     <span className="public-social">
-                      <SocialLabel platform={social.platform} />
+                      <SocialLabel original={original} platform={social.platform} />
                     </span>
                   ) : (
                     <a className="public-social" href={social.url} rel="noreferrer" target="_blank">
-                      <SocialLabel platform={social.platform} />
+                      <SocialLabel original={original} platform={social.platform} />
                     </a>
                   )}
                 </li>

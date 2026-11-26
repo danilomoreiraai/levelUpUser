@@ -3,6 +3,7 @@ import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import { type AdminPage, type Presentation, platforms, presets } from "../shared/contracts";
 import { ApiError, changePublication, getErrorMessage, getPublicUrl, saveDraft } from "./api";
 import { LinkPage } from "./LinkPage";
+import { originalArtwork } from "./originalArtwork";
 import { socialNames } from "./presentation";
 
 type LinkValues = Presentation["links"][number];
@@ -24,6 +25,7 @@ const maxImageSize = 5 * 1024 * 1024;
 const imageTypes = ["image/jpeg", "image/png", "image/webp"];
 const emptyUpload: UploadState = { busy: false, problem: "" };
 const presetNames: Record<Presentation["preset"], string> = {
+  original: "Modelo inicial",
   neutral: "Neutro",
   sage: "Sálvia",
   dusk: "Crepúsculo",
@@ -45,7 +47,7 @@ function moveRow<T>(items: T[], index: number, direction: -1 | 1): T[] {
   return reordered;
 }
 
-function readImage(file: File): Promise<string> {
+function readImage(file: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.addEventListener("load", () => resolve(String(reader.result)), { once: true });
@@ -328,6 +330,20 @@ export function PageEditor({
     }
   }
 
+  async function selectOriginalPortrait() {
+    setUploadState("avatar", { busy: true, problem: "" });
+    try {
+      const response = await fetch(originalArtwork.light.avatar);
+      if (!response.ok) throw new Error("Could not load the template image");
+      setImage("avatar", await readImage(await response.blob()));
+    } catch {
+      setUploadState("avatar", {
+        busy: false,
+        problem: "Não foi possível carregar a foto do modelo.",
+      });
+    }
+  }
+
   async function persist() {
     const { slug, handle, preset, blur, links, socials, avatar, backgroundImage } = draft;
     const saved = await saveDraft(page.id, {
@@ -458,6 +474,22 @@ export function PageEditor({
                 state={uploads.avatar}
                 url={draft.avatarUrl}
               />
+              {draft.preset === "original" && (
+                <div className="form-field">
+                  <button
+                    className="button"
+                    type="button"
+                    onClick={() => void selectOriginalPortrait()}
+                  >
+                    Usar foto do modelo
+                  </button>
+                  {!draft.avatarUrl && (
+                    <p className="field-hint">
+                      Selecione a foto do modelo para usá-la na publicação.
+                    </p>
+                  )}
+                </div>
+              )}
             </section>
 
             <section className="panel editor-section" aria-labelledby="links-title">
@@ -584,7 +616,7 @@ export function PageEditor({
             <section className="panel editor-section" aria-labelledby="background-title">
               <h2 id="background-title">Plano de fundo</h2>
               <fieldset className="presets">
-                <legend>Cor de fundo</legend>
+                <legend>Modelo de fundo</legend>
                 <div className="preset-options">
                   {presets.map((preset) => (
                     <label key={preset} className="preset-option">
@@ -614,7 +646,7 @@ export function PageEditor({
                     Desfoque do fundo <span aria-hidden="true">{draft.blur} px</span>
                   </span>
                   <input
-                    disabled={!draft.backgroundUrl}
+                    disabled={!draft.backgroundUrl && draft.preset !== "original"}
                     max={24}
                     min={0}
                     onChange={(event) => update({ blur: event.currentTarget.valueAsNumber })}

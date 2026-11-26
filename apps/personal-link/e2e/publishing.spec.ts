@@ -27,6 +27,26 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   expect(staticResponse.status()).toBe(200);
   expect(staticResponse.headers()["cache-control"]).toContain("immutable");
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  const portfolioOrigin = process.env.VITE_LEVELUP_SITE_ORIGIN;
+  if (portfolioOrigin) {
+    const navigation = page.getByRole("navigation", { name: "Navegação do LevelUp User" });
+    await expect(navigation.getByRole("link", { name: "Home" })).toHaveAttribute(
+      "href",
+      `${portfolioOrigin}/`,
+    );
+    await expect(navigation.getByRole("link", { name: "Projects" })).toHaveAttribute(
+      "href",
+      `${portfolioOrigin}/projects`,
+    );
+    await expect(navigation.getByRole("link", { name: "Services" })).toHaveAttribute(
+      "href",
+      `${portfolioOrigin}/services`,
+    );
+  }
+  await expect(page.getByRole("button", { name: "Entrar" })).toHaveCSS(
+    "background-color",
+    "rgb(0, 102, 214)",
+  );
   await page.getByLabel("Senha do painel").fill("definitely-incorrect");
   await page.getByRole("button", { name: "Entrar" }).click();
   await expect(page.getByRole("alert")).toContainText("Senha incorreta.");
@@ -37,6 +57,21 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   await page.getByLabel("Endereço da página").fill(slug);
   await page.getByRole("button", { name: "Criar página" }).click();
   await expect(page.getByRole("heading", { name: "Editar página" })).toBeFocused();
+
+  const preview = page.getByRole("region", { name: "Prévia da página de links" });
+  await expect(page.getByRole("radio", { name: "Modelo inicial" })).toBeChecked();
+  await expect(preview).toHaveAttribute("data-preset", "original");
+  const samplePhoto = preview.getByRole("img", { name: "Foto de exemplo do modelo" });
+  await expect(samplePhoto).toBeVisible();
+  const originalBackground = preview.locator(".original-background img");
+  await expect
+    .poll(() => originalBackground.evaluate((image: HTMLImageElement) => image.naturalWidth))
+    .toBeGreaterThan(0);
+  await page.getByRole("slider", { name: "Desfoque do fundo" }).fill("6");
+  await expect(originalBackground).toHaveCSS("filter", "blur(6px)");
+  await page.getByRole("button", { name: "Usar foto do modelo" }).click();
+  await expect(page.getByRole("button", { name: "Remover foto de perfil" })).toBeVisible();
+  await expect(samplePhoto).toHaveCount(0);
 
   await page.getByLabel("Nome de usuário (@)").fill("atelier-ficticio");
   const upload = { name: "fundo-ficticio.png", mimeType: "image/png", buffer: image };
@@ -59,8 +94,10 @@ test("edits, previews and publishes a shareable page on the visitor's local them
     .selectOption("instagram");
   await page.getByLabel("URL da rede social 1").fill("https://example.com/social");
 
-  const preview = page.getByRole("region", { name: "Prévia da página de links" });
   await expect(preview.getByRole("heading", { name: "@atelier-ficticio" })).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+    .toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth));
   await expect(preview.locator(".link-background")).toHaveCSS("filter", "blur(12px)");
   await page.getByRole("button", { name: "Salvar rascunho" }).click();
   await expect(page.getByText("Rascunho salvo.", { exact: true })).toBeVisible();
@@ -76,7 +113,7 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   await expect(page.getByText("Link copiado.", { exact: true })).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(`${baseURL}${publicPath}`);
   const publication = (await (await page.request.get(apiPath)).json()) as Presentation;
-  expect(publication).toMatchObject({ handle: "atelier-ficticio", blur: 12 });
+  expect(publication).toMatchObject({ handle: "atelier-ficticio", blur: 12, preset: "original" });
   const initialBackground = publication.backgroundUrl;
   const initialAvatar = publication.avatarUrl;
   if (!initialBackground || !initialAvatar) throw new Error("Missing uploaded images");
