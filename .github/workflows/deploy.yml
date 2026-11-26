@@ -59,7 +59,9 @@ jobs:
           push: true
           tags: ${{ steps.images.outputs.personal_link }}:${{ env.RELEASE }}
           labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
-          build-args: APP_RELEASE=${{ env.RELEASE }}
+          build-args: |
+            APP_RELEASE=${{ env.RELEASE }}
+            VITE_LEVELUP_SITE_ORIGIN=${{ vars.VITE_LEVELUP_SITE_ORIGIN }}
 
       - name: Build and publish the portfolio
         id: site

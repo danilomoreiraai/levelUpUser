@@ -1,4 +1,4 @@
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { type FormEvent, type MouseEvent, useCallback, useEffect, useState } from "react";
 
 import type { AdminPage } from "../shared/contracts";
 import {
@@ -16,6 +16,26 @@ import { formatHandle } from "./presentation";
 
 type AdminErrorHandler = (error: unknown) => boolean;
 type EditingState = { busy: boolean; dirty: boolean };
+
+const portfolioNavigation = [
+  { label: "Home", path: "/" },
+  { label: "Projects", path: "/projects" },
+  { label: "Services", path: "/services" },
+];
+
+function getPortfolioOrigin(): string | null {
+  const configured = import.meta.env.VITE_LEVELUP_SITE_ORIGIN?.trim();
+  if (!configured) return null;
+
+  try {
+    const url = new URL(configured);
+    return url.protocol === "https:" && url.href === `${url.origin}/` ? url.origin : null;
+  } catch {
+    return null;
+  }
+}
+
+const portfolioOrigin = getPortfolioOrigin();
 
 function AdminLoading({ label }: { label: string }) {
   return (
@@ -47,9 +67,12 @@ function Login({ onAuthorized }: { onAuthorized: () => void }) {
   }
 
   return (
-    <section className="login-panel panel" aria-labelledby="login-title">
-      <h1 id="login-title">Painel de páginas de links</h1>
-      <form onSubmit={submit} aria-busy={pending}>
+    <section className="login-panel" aria-labelledby="login-title">
+      <header className="login-heading">
+        <p className="section-label">Serviços</p>
+        <h1 id="login-title">Painel de páginas de links</h1>
+      </header>
+      <form className="panel" onSubmit={submit} aria-busy={pending}>
         <label className="field">
           <span>Senha do painel</span>
           <input
@@ -302,23 +325,63 @@ export function AdminApp() {
     }
   }
 
+  function canLeaveEditor(): boolean {
+    return !editing.busy && (!editing.dirty || window.confirm("Sair sem salvar as alterações?"));
+  }
+
+  function guardPortfolioNavigation(event: MouseEvent<HTMLAnchorElement>) {
+    if (editing.busy) event.preventDefault();
+  }
+
+  const wordmark = (
+    <>
+      LevelUp <span>User</span>
+    </>
+  );
+
   return (
     <div className="admin-shell">
       <header className="admin-header">
         <div className="admin-inner masthead">
-          <strong className="brand">LevelUp User</strong>
-          {session === "active" && (
-            <button
-              className="button button--quiet"
-              disabled={pending || editing.busy}
-              onClick={() => {
-                if (!editing.dirty || window.confirm("Sair sem salvar as alterações?")) void exit();
-              }}
-              type="button"
-            >
-              {pending ? "Saindo…" : "Sair"}
-            </button>
+          {portfolioOrigin ? (
+            <a className="brand" href={portfolioOrigin} onClick={guardPortfolioNavigation}>
+              {wordmark}
+            </a>
+          ) : (
+            <strong className="brand">{wordmark}</strong>
           )}
+          <div className="masthead-actions">
+            {session === "active" && (
+              <button
+                className="button button--quiet"
+                disabled={pending || editing.busy}
+                onClick={() => {
+                  if (canLeaveEditor()) void exit();
+                }}
+                type="button"
+              >
+                {pending ? "Saindo…" : "Sair"}
+              </button>
+            )}
+            {portfolioOrigin && (
+              <nav className="admin-nav" aria-label="Navegação do LevelUp User">
+                {portfolioNavigation.map(({ label, path }) => (
+                  <a
+                    className={
+                      path === "/services"
+                        ? "admin-nav-link admin-nav-link--current"
+                        : "admin-nav-link"
+                    }
+                    href={`${portfolioOrigin}${path}`}
+                    key={path}
+                    onClick={guardPortfolioNavigation}
+                  >
+                    {label}
+                  </a>
+                ))}
+              </nav>
+            )}
+          </div>
         </div>
       </header>
       <main className="admin-inner admin-main">

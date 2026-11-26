@@ -8,10 +8,12 @@ composição da página pública segue o [modelo julianaLinktree](https://github
 
 Use Node.js 24 e um banco PostgreSQL 18 dedicado. A partir de `apps/personal-link`:
 
+Copie `.env.example` para `.env` e, se quiser exibir os links de navegação do painel,
+preencha `VITE_LEVELUP_SITE_ORIGIN` com a origem do site, por exemplo `https://levelupuser.com`.
+
 ```bash
 npm ci
 npm run build
-cp .env.example .env
 printf 'Senha do painel: '
 IFS= read -rs personal_link_password
 printf '\n'
@@ -37,7 +39,8 @@ cobrem desktop e emulação mobile.
 
 ## Primeira publicação no Coolify
 
-1. Aguarde a aprovação da CI no commit de `main`. O job **Release container images** informa
+1. Configure a variável pública de repositório `VITE_LEVELUP_SITE_ORIGIN` com a origem do site.
+   Aguarde a aprovação da CI no commit de `main`. O job **Release container images** informa
    a imagem do editor pelo digest `sha256`. Verifique que o servidor Coolify consegue lê-la no
    GitHub Container Registry. Use o acesso de leitura do registry configurado no servidor para
    imagens privadas.

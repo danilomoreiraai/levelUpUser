@@ -1,4 +1,4 @@
-export const presets = ["neutral", "sage", "dusk"] as const;
+export const presets = ["original", "neutral", "sage", "dusk"] as const;
 export const platforms = [
   "instagram",
   "facebook",
