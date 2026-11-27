@@ -24,6 +24,16 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535) {
 }
 
 const database = new Database(required("DATABASE_URL"));
+const instagramAvatar = (() => {
+  try {
+    return createInstagramAvatarLookup(process.env);
+  } catch {
+    console.warn(
+      "Confira as variáveis INSTAGRAM_GRAPH_API_URL, INSTAGRAM_BUSINESS_ACCOUNT_ID e INSTAGRAM_GRAPH_ACCESS_TOKEN.",
+    );
+    return undefined;
+  }
+})();
 let app: Awaited<ReturnType<typeof createApp>> | undefined;
 try {
   await database.migrate();
@@ -34,7 +44,7 @@ try {
     release: process.env.APP_RELEASE ?? "development",
     clientDirectory: fileURLToPath(new URL("../client", import.meta.url)),
     logger: process.env.NODE_ENV !== "test",
-    instagramAvatar: createInstagramAvatarLookup(process.env),
+    instagramAvatar,
     trustedProxies: (process.env.TRUSTED_PROXIES ?? "")
       .split(",")
       .map((entry) => entry.trim())

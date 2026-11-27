@@ -106,6 +106,8 @@
 .original-avatar {
   width: 112px;
   height: 112px;
+  border: 2px solid var(--original-stroke);
+  border-radius: 50%;
   object-fit: cover;
 }
 
@@ -280,12 +282,6 @@ a.original-social:hover {
 .original-footer {
   font-size: 14px;
   overflow-wrap: anywhere;
-}
-
-.original-footer a,
-.original-footer-link {
-  color: inherit;
-  text-decoration: underline;
 }
 
 .preset-swatch[data-preset="original"] {

@@ -238,9 +238,10 @@ export async function createApp(options: Options) {
     const access = (request: FastifyRequest): EditorAccess =>
       scope === "admin" ? "admin" : clientDigest(request);
 
-    app.get<{ Params: PageParams }>(base, { onRequest }, async (request) =>
-      database.getEditorPage(readId(request.params.id), access(request)),
-    );
+    app.get<{ Params: PageParams }>(base, { onRequest }, async (request) => ({
+      ...(await database.getEditorPage(readId(request.params.id), access(request))),
+      instagramLookupAvailable: Boolean(options.instagramAvatar),
+    }));
     app.post<{ Params: PageParams }>(
       `${base}/instagram-avatar`,
       { onRequest, bodyLimit: 512 },
@@ -249,7 +250,7 @@ export async function createApp(options: Options) {
         if (!options.instagramAvatar) {
           throw new RequestError(
             503,
-            "Busca do Instagram indisponível. Você pode enviar uma foto.",
+            "A busca do Instagram ainda precisa ser ativada. Você pode enviar uma foto.",
           );
         }
         const username = instagramUsername(object(request.body).handle);

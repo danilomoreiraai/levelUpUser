@@ -84,11 +84,13 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   await page.getByRole("radio", { name: "Original" }).check();
 
   await page.getByLabel("Nome de usuário (@)").fill("atelier-ficticio");
-  await page.getByRole("button", { name: "Buscar foto do Instagram" }).click();
-  await expect(page.getByRole("alert")).toContainText("Busca do Instagram indisponível");
+  await expect(page.getByRole("button", { name: "Buscar foto do Instagram" })).toBeDisabled();
+  await expect(page.getByText("Ative a integração da Meta", { exact: false })).toBeVisible();
   await expect(placeholder).toBeVisible();
   const upload = { name: "fundo-ficticio.png", mimeType: "image/png", buffer: image };
   await page.getByLabel("Foto de perfil", { exact: true }).setInputFiles(upload);
+  await expect(preview.locator("img.original-avatar")).toHaveCSS("border-radius", "50%");
+  await expect(preview.locator("img.original-avatar")).toHaveCSS("border-top-width", "2px");
   await page.getByLabel("Imagem de fundo", { exact: true }).setInputFiles(upload);
   const blur = page.getByRole("slider", { name: "Desfoque do fundo" });
   await expect(blur).toBeEnabled();
@@ -141,13 +143,18 @@ test("edits, previews and publishes a shareable page on the visitor's local them
     const context = await browser.newContext({ baseURL, timezoneId: visitor.timezoneId });
     try {
       const publicPage = await context.newPage();
-      await publicPage.clock.setFixedTime(new Date("2026-11-25T12:00:00Z"));
+      await publicPage.clock.install({ time: new Date("2026-11-25T12:00:00Z") });
       const response = await publicPage.goto(publicPath);
       expect(response?.status()).toBe(200);
       expect(response?.headers()["cache-control"]).toContain("no-store");
       const surface = publicPage.getByRole("main");
       await expect(surface.getByRole("heading", { name: "@atelier-ficticio" })).toBeVisible();
       await expect(surface).toHaveAttribute("data-theme", visitor.initial);
+      await expect(surface.locator("img.original-avatar")).toHaveCSS("border-radius", "50%");
+      await expect(surface.locator("img.original-avatar")).toHaveCSS("border-top-width", "2px");
+      await expect(surface.locator("footer")).toHaveText(
+        "@atelier-ficticio 2026. Todos os direitos reservados.",
+      );
       await expect(surface.getByRole("link", { name: "Meu site" })).toHaveAttribute(
         "href",
         "https://google.com/",
@@ -163,6 +170,17 @@ test("edits, previews and publishes a shareable page on the visitor's local them
       await surface.getByRole("button", { name: visitor.switchTo }).click();
       await publicPage.reload();
       await expect(surface).toHaveAttribute("data-theme", visitor.initial);
+      if (visitor.timezoneId === "Europe/Dublin") {
+        await publicPage.clock.setSystemTime(new Date("2026-12-31T23:59:00Z"));
+        await publicPage.reload();
+        await expect(surface.locator("footer")).toHaveText(
+          "@atelier-ficticio 2026. Todos os direitos reservados.",
+        );
+        await publicPage.clock.fastForward(60_000);
+        await expect(surface.locator("footer")).toHaveText(
+          "@atelier-ficticio 2027. Todos os direitos reservados.",
+        );
+      }
     } finally {
       await context.close();
     }

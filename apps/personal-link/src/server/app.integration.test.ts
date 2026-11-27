@@ -217,7 +217,10 @@ describe.skipIf(!databaseUrl)("Personal Link API with PostgreSQL", () => {
     expect(adminPage.json<AdminPage>().hasClientLink).toBe(true);
     expect(adminPage.body).not.toContain(token);
     const pages = await app.inject({ url: "/api/admin/pages", headers: { cookie } });
-    expect(pages.json<AdminPage[]>()).toContainEqual(adminPage.json<AdminPage>());
+    expect(adminPage.json<AdminPage>().instagramLookupAvailable).toBe(true);
+    expect(pages.json<AdminPage[]>()).toContainEqual(
+      expect.objectContaining({ id: page.id, hasClientLink: true }),
+    );
     expect(pages.body).not.toContain(token);
     expect((await app.inject(base)).statusCode).toBe(401);
     expect((await exchange(token, otherBase)).statusCode).toBe(401);

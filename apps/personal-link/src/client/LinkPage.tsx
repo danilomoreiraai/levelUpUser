@@ -5,7 +5,7 @@ import type { LocalTheme } from "../shared/theme";
 import { originalArtwork, originalSocialIcons } from "./originalArtwork";
 import "./original-template.css";
 import { formatHandle, socialNames } from "./presentation";
-import { useLocalTheme } from "./useLocalTheme";
+import { useLocalAppearance } from "./useLocalAppearance";
 
 type Platform = Presentation["socials"][number]["platform"];
 
@@ -53,37 +53,6 @@ function identifyRows<T>(items: T[], describe: (item: T) => string[]) {
   });
 }
 
-function OriginalFooter({
-  presentation,
-  preview,
-}: {
-  presentation: Presentation;
-  preview: boolean;
-}) {
-  const name = presentation.handle
-    .replace(/^@+/, "")
-    .replace(/[._-]+/g, " ")
-    .trim();
-  const displayName = name.replace(/(^| )\p{L}/gu, (letter) => letter.toLocaleUpperCase("pt-BR"));
-  const instagram = presentation.socials.find((social) => social.platform === "instagram");
-
-  if (!displayName) return null;
-
-  return (
-    <footer className="original-footer">
-      Feito com ♥ 2025 ©{" "}
-      {instagram && !preview ? (
-        <a href={instagram.url} rel="noreferrer" target="_blank">
-          {displayName}
-        </a>
-      ) : (
-        <span className={instagram ? "original-footer-link" : undefined}>{displayName}</span>
-      )}
-      . Todos os direitos reservados.
-    </footer>
-  );
-}
-
 export function LinkPage({
   presentation,
   preview = false,
@@ -91,7 +60,7 @@ export function LinkPage({
   presentation: Presentation;
   preview?: boolean;
 }) {
-  const autoTheme = useLocalTheme();
+  const { theme: autoTheme, year } = useLocalAppearance();
   const [override, setOverride] = useState<LocalTheme | null>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const theme = override ?? autoTheme;
@@ -220,7 +189,11 @@ export function LinkPage({
             )}
           </ul>
         )}
-        <OriginalFooter presentation={presentation} preview={preview} />
+        {presentation.handle.trim() && (
+          <footer className="original-footer">
+            {`${handle} ${year}. Todos os direitos reservados.`}
+          </footer>
+        )}
       </div>
     </Display>
   );

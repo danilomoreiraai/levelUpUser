@@ -111,12 +111,14 @@ function ImageField({
   label,
   onRemove,
   onSelect,
+  portrait = false,
   state,
   url,
 }: {
   label: string;
   onRemove: () => void;
   onSelect: (file: File) => void;
+  portrait?: boolean;
   state: UploadState;
   url: string | null;
 }) {
@@ -151,8 +153,8 @@ function ImageField({
         </p>
       )}
       {url && (
-        <div className="image-selection">
-          <img src={url} alt="" width={52} height={48} />
+        <div className={portrait ? "image-selection image-selection--portrait" : "image-selection"}>
+          <img src={url} alt="" width={portrait ? 48 : 52} height={48} />
           <button
             className="button button--small"
             disabled={state.busy}
@@ -272,6 +274,7 @@ export function PageEditor({
   const [notice, setNotice] = useState("");
   const [copyNotice, setCopyNotice] = useState("");
   const heading = useRef<HTMLHeadingElement>(null);
+  const instagramHintId = useId();
   const nextId = useRef(maxLinks + maxSocials);
   const rowToFocus = useRef<number | null>(null);
   const busy =
@@ -492,17 +495,32 @@ export function PageEditor({
                 label="Foto de perfil"
                 onRemove={() => setImage("avatar", null)}
                 onSelect={(file) => void upload("avatar", file)}
+                portrait
                 state={uploads.avatar}
                 url={draft.avatarUrl}
               />
               <button
+                aria-describedby={
+                  initialPage.instagramLookupAvailable ? undefined : instagramHintId
+                }
                 className="button"
-                disabled={uploads.avatar.busy || !draft.handle.trim()}
+                disabled={
+                  !initialPage.instagramLookupAvailable ||
+                  uploads.avatar.busy ||
+                  !draft.handle.trim()
+                }
                 type="button"
                 onClick={() => void selectInstagramPortrait()}
               >
                 {uploads.avatar.busy ? "Carregando foto…" : "Buscar foto do Instagram"}
               </button>
+              {!initialPage.instagramLookupAvailable && (
+                <p className="field-hint" id={instagramHintId}>
+                  {scope === "admin"
+                    ? "Ative a integração da Meta no Coolify para buscar fotos do Instagram."
+                    : "A busca do Instagram ainda precisa ser ativada pelo responsável pela página."}
+                </p>
+              )}
             </section>
 
             <section className="panel editor-section" aria-labelledby="links-title">
