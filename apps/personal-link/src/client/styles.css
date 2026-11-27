@@ -751,7 +751,6 @@ p {
 }
 
 .theme-button,
-.theme-reset,
 .public-link,
 .public-social {
   display: inline-flex;
@@ -768,8 +767,7 @@ p {
   overflow-wrap: anywhere;
 }
 
-.theme-button,
-.theme-reset {
+.theme-button {
   min-height: 2.5rem;
   gap: 0.35rem;
   cursor: pointer;
@@ -779,11 +777,6 @@ p {
 .theme-button span {
   font-size: 1.2em;
   line-height: 1;
-}
-
-.theme-reset {
-  border-color: transparent;
-  background: transparent;
 }
 
 .public-link {
@@ -820,7 +813,6 @@ p {
 }
 
 .theme-button:hover,
-.theme-reset:hover,
 a.public-link:hover,
 a.public-social:hover {
   background: var(--link-hover);

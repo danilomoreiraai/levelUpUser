@@ -137,8 +137,20 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   expect((await page.request.get(initialBackground)).status()).toBe(200);
 
   for (const visitor of [
-    { timezoneId: "Europe/Dublin", initial: "light", switchTo: "Tema escuro", manual: "dark" },
-    { timezoneId: "Asia/Tokyo", initial: "dark", switchTo: "Tema claro", manual: "light" },
+    {
+      timezoneId: "Europe/Dublin",
+      initial: "light",
+      switchTo: "Tema escuro",
+      opposite: "dark",
+      hoursToBoundary: 6,
+    },
+    {
+      timezoneId: "Asia/Tokyo",
+      initial: "dark",
+      switchTo: "Tema claro",
+      opposite: "light",
+      hoursToBoundary: 9,
+    },
   ]) {
     const context = await browser.newContext({ baseURL, timezoneId: visitor.timezoneId });
     try {
@@ -164,12 +176,17 @@ test("edits, previews and publishes a shareable page on the visitor's local them
         "https://example.com/social",
       );
       await surface.getByRole("button", { name: visitor.switchTo }).click();
-      await expect(surface).toHaveAttribute("data-theme", visitor.manual);
-      await surface.getByRole("button", { name: "Automático" }).click();
-      await expect(surface).toHaveAttribute("data-theme", visitor.initial);
-      await surface.getByRole("button", { name: visitor.switchTo }).click();
+      await expect(surface).toHaveAttribute("data-theme", visitor.opposite);
+      await expect(surface.getByRole("button")).toHaveCount(1);
       await publicPage.reload();
       await expect(surface).toHaveAttribute("data-theme", visitor.initial);
+
+      await surface.getByRole("button", { name: visitor.switchTo }).click();
+      await surface.getByRole("button").click();
+      await publicPage.clock.fastForward(visitor.hoursToBoundary * 60 * 60 * 1_000);
+      await expect(surface).toHaveAttribute("data-theme", visitor.initial);
+      await publicPage.reload();
+      await expect(surface).toHaveAttribute("data-theme", visitor.opposite);
       if (visitor.timezoneId === "Europe/Dublin") {
         await publicPage.clock.setSystemTime(new Date("2026-12-31T23:59:00Z"));
         await publicPage.reload();
