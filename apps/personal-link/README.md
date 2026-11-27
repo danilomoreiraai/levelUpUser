@@ -97,5 +97,7 @@ entra no rascunho quando você salva. Você pode enviar um arquivo ao editar qua
 A integração usa o Business Discovery da Meta, que pesquisa contas profissionais. Para ativar
 no Coolify, configure `INSTAGRAM_GRAPH_API_URL` com a origem versionada da Graph API,
 `INSTAGRAM_BUSINESS_ACCOUNT_ID` com o ID da conta profissional vinculada ao app e
-`INSTAGRAM_GRAPH_ACCESS_TOKEN` com o token de acesso autorizado. Consulte as permissões em
-[Business Discovery](https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/).
+`INSTAGRAM_GRAPH_ACCESS_TOKEN` com um token de usuário do Facebook que tenha acesso à conta profissional e as permissões
+`instagram_basic`, `instagram_manage_insights` e `pages_read_engagement`. Para funções de Página
+atribuídas pelo Gerenciador de Negócios, consulte as permissões adicionais em
+[Business Discovery](https://developers.facebook.com/documentation/instagram-platform/instagram-graph-api/reference/ig-user/business_discovery).
