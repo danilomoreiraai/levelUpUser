@@ -1,4 +1,4 @@
-import { type CSSProperties, useRef, useState } from "react";
+import { type CSSProperties, useState } from "react";
 
 import type { Presentation } from "../shared/contracts";
 import type { LocalTheme } from "../shared/theme";
@@ -62,7 +62,6 @@ export function LinkPage({
 }) {
   const { theme: autoTheme, year } = useLocalAppearance();
   const [override, setOverride] = useState<LocalTheme | null>(null);
-  const toggle = useRef<HTMLButtonElement>(null);
   const theme = override ?? autoTheme;
   const targetTheme = theme === "dark" ? "light" : "dark";
   const themeLabel = targetTheme === "dark" ? "Tema escuro" : "Tema claro";
@@ -126,23 +125,10 @@ export function LinkPage({
             aria-label={themeLabel}
             className="original-theme-knob"
             onClick={() => setOverride(targetTheme)}
-            ref={toggle}
             style={{ backgroundImage: `url("${artwork.themeIcon}")` }}
             type="button"
           />
           <span aria-hidden="true" className="original-theme-track" />
-          {override && (
-            <button
-              className="original-theme-reset"
-              onClick={() => {
-                setOverride(null);
-                toggle.current?.focus();
-              }}
-              type="button"
-            >
-              Automático
-            </button>
-          )}
         </div>
 
         {presentation.links.length > 0 ? (

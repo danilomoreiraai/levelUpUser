@@ -193,22 +193,6 @@
   outline: 8px solid var(--original-highlight);
 }
 
-.original-theme-reset {
-  position: absolute;
-  top: 50%;
-  left: calc(100% + 12px);
-  min-height: 44px;
-  padding: 0 4px;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  font-size: 12px;
-  text-decoration: underline;
-  transform: translateY(-50%);
-}
-
 .original-links,
 .original-socials {
   display: flex;
