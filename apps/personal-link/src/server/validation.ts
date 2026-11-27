@@ -1,4 +1,5 @@
 import { type PageContent, platforms, presets } from "../shared/contracts.js";
+import { normalizeLinkUrl } from "../shared/normalizeLinkUrl.js";
 import { RequestError } from "./errors.js";
 
 const reservedSlugs = new Set(["admin", "api", "assets", "health", "healthz", "readyz", "media"]);
@@ -40,25 +41,9 @@ export function readRevision(value: unknown): number {
 }
 
 function readUrl(value: unknown): string {
-  const message = "Informe um endereço completo começando com http:// ou https://.";
-  const raw = requiredText(value, 2_048, message);
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    throw new RequestError(400, message);
-  }
-  if (
-    !/^https?:\/\//iu.test(raw) ||
-    (url.protocol !== "https:" && url.protocol !== "http:") ||
-    url.username ||
-    url.password ||
-    /[\s\\]/u.test(raw) ||
-    url.href.length > 2_048
-  ) {
-    throw new RequestError(400, message);
-  }
-  return url.href;
+  const url = typeof value === "string" ? normalizeLinkUrl(value) : null;
+  if (!url) throw new RequestError(400, "Informe um endereço válido, como exemplo.com.");
+  return url;
 }
 
 function readCollection(value: unknown, max: number, message: string): unknown[] {

@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { createApp } from "./app.js";
 import { Database } from "./database.js";
+import { createInstagramAvatarLookup } from "./instagram.js";
 
 function required(name: string): string {
   const value = process.env[name];
@@ -33,6 +34,7 @@ try {
     release: process.env.APP_RELEASE ?? "development",
     clientDirectory: fileURLToPath(new URL("../client", import.meta.url)),
     logger: process.env.NODE_ENV !== "test",
+    instagramAvatar: createInstagramAvatarLookup(process.env),
     trustedProxies: (process.env.TRUSTED_PROXIES ?? "")
       .split(",")
       .map((entry) => entry.trim())

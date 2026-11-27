@@ -250,7 +250,7 @@ function PageWorkspace({
       <PageEditor
         key={current.id}
         initialPage={current}
-        onAdminError={onAdminError}
+        onAccessError={onAdminError}
         onBack={showList}
         onEditingChange={onEditingChange}
         onReload={resetEditor}

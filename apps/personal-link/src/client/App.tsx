@@ -7,6 +7,9 @@ import { formatHandle } from "./presentation";
 import { useLocalTheme } from "./useLocalTheme";
 
 const AdminApp = lazy(() => import("./AdminApp").then((module) => ({ default: module.AdminApp })));
+const ClientEditor = lazy(() =>
+  import("./ClientEditor").then((module) => ({ default: module.ClientEditor })),
+);
 
 type PublicState =
   | { kind: "loading" }
@@ -90,16 +93,17 @@ function getSlug(pathname: string): string | null {
 
 export function App() {
   const path = window.location.pathname;
-  if (path === "/admin" || path.startsWith("/admin/")) {
+  const clientId = /^\/edit\/([a-f0-9-]{36})\/?$/u.exec(path)?.[1];
+  if (path === "/admin" || path.startsWith("/admin/") || clientId) {
     return (
       <Suspense
         fallback={
           <main className="admin-shell startup" role="status">
-            Carregando painel…
+            Carregando editor…
           </main>
         }
       >
-        <AdminApp />
+        {clientId ? <ClientEditor id={clientId} /> : <AdminApp />}
       </Suspense>
     );
   }

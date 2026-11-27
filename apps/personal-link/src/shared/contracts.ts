@@ -33,5 +33,6 @@ export type AdminPage = {
   revision: number;
   published: boolean;
   slugLocked: boolean;
+  hasClientLink?: boolean;
   draft: Presentation;
 };

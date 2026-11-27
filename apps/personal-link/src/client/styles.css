@@ -599,6 +599,10 @@ p {
   background: var(--swatch, #dbcdbc);
 }
 
+.preset-swatch[data-preset="neutral"] {
+  --swatch: #b8b8b8;
+}
+
 .preset-swatch[data-preset="sage"] {
   --swatch: #a8bd92;
 }
@@ -650,16 +654,6 @@ p {
   --focus: #22271d;
 }
 
-.link-page[data-preset="sage"] {
-  --canvas: #d7e4cd;
-  --ambient: #f3f7e8;
-}
-
-.link-page[data-preset="dusk"] {
-  --canvas: #e5d5e8;
-  --ambient: #fbf0f2;
-}
-
 .link-page[data-theme="dark"] {
   color-scheme: dark;
   --canvas: #1c211b;
@@ -671,16 +665,6 @@ p {
   --link-edge: #f2f4db66;
   --veil: #121510c9;
   --focus: #fcfbef;
-}
-
-.link-page[data-theme="dark"][data-preset="sage"] {
-  --canvas: #152519;
-  --ambient: #2c4a34;
-}
-
-.link-page[data-theme="dark"][data-preset="dusk"] {
-  --canvas: #221b2d;
-  --ambient: #4b3551;
 }
 
 .link-page--preview {
