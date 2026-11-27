@@ -110,7 +110,7 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   const blur = page.getByRole("slider", { name: "Desfoque do fundo" });
   await expect(blur).toBeEnabled();
   await blur.fill("12");
-  await expect.poll(overlay).toBe("rgba(255, 255, 255, 0.7)");
+  await expect.poll(overlay).toBe("rgba(255, 255, 255, 0.5)");
   await page.getByRole("button", { name: "Adicionar link" }).click();
   await page.getByLabel("Título do link 1").fill("Meu site");
   await page.getByLabel("URL do link 1").fill("google.com");
@@ -183,7 +183,8 @@ test("edits, previews and publishes a shareable page on the visitor's local them
       await expect(surface.getByRole("heading", { name: "@atelier-ficticio" })).toBeVisible();
       await expect(surface).toHaveAttribute("data-theme", visitor.initial);
       if (visitor.initial === "light") {
-        await expect.poll(() => backgroundBrightness(publicPage)).toBeGreaterThan(175);
+        await expect.poll(() => backgroundBrightness(publicPage)).toBeGreaterThan(125);
+        await expect.poll(() => backgroundBrightness(publicPage)).toBeLessThan(140);
       } else {
         await expect.poll(() => backgroundBrightness(publicPage)).toBeLessThan(20);
       }
