@@ -88,11 +88,26 @@ export function createInstagramAvatarLookup(env: NodeJS.ProcessEnv, request = fe
         ...init,
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (result.status === 400) {
-        const error = (await result.json()) as { error?: { code?: number } };
-        if (error.error?.code === 100) throw new RequestError(404, missing);
+      if (!result.ok) {
+        const body = (await result.json().catch(() => null)) as {
+          error?: { code?: number };
+        } | null;
+        const code = body?.error?.code;
+        if (
+          result.status === 401 ||
+          result.status === 403 ||
+          code === 190 ||
+          code === 10 ||
+          code === 200
+        ) {
+          throw new RequestError(
+            503,
+            "A conexão com a Meta precisa ser atualizada. Você pode enviar uma foto.",
+          );
+        }
+        if (result.status === 400 && code === 100) throw new RequestError(404, missing);
+        throw new RequestError(502, unavailable);
       }
-      if (!result.ok) throw new RequestError(502, unavailable);
       const profile = (await result.json()) as {
         business_discovery?: { profile_picture_url?: unknown };
       };

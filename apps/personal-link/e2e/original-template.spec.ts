@@ -115,6 +115,8 @@ async function renderReference(page: Page, theme: "dark" | "light", avatarUrl: s
     ion-icon { display: inline-block; width: 1em; height: 1em; }
     ion-icon svg { display: block; width: 100%; height: 100%; fill: currentColor; }
     ${css}
+    /* The portrait frame and footer text are the requested changes to the source. */
+    #profile img { height: 112px; border: 2px solid var(--stroke-color); border-radius: 50%; object-fit: cover; }
   </style>
 </head>
 <body>
@@ -125,7 +127,7 @@ async function renderReference(page: Page, theme: "dark" | "light", avatarUrl: s
     <div id="social-links">
       ${model.socials.map(({ url }, index) => `<a href="${url}"><ion-icon>${socialIcons[index]}</ion-icon></a>`).join("")}
     </div>
-    <footer>Feito com ♥ 2025 © <a href="${model.socials[0].url}">Juliana Manduca</a>. Todos os direitos reservados.</footer>
+    <footer>@${model.handle} 2026. Todos os direitos reservados.</footer>
   </div>
 </body>
 </html>`,

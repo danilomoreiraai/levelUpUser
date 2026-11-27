@@ -4,7 +4,7 @@ import type { Presentation } from "../shared/contracts";
 import { ApiError, getErrorMessage, loadPublicPage } from "./api";
 import { LinkPage } from "./LinkPage";
 import { formatHandle } from "./presentation";
-import { useLocalTheme } from "./useLocalTheme";
+import { useLocalAppearance } from "./useLocalAppearance";
 
 const AdminApp = lazy(() => import("./AdminApp").then((module) => ({ default: module.AdminApp })));
 const ClientEditor = lazy(() =>
@@ -18,7 +18,7 @@ type PublicState =
   | { kind: "loaded"; page: Presentation };
 
 function PublicPage({ slug }: { slug: string | null }) {
-  const theme = useLocalTheme();
+  const { theme } = useLocalAppearance();
   const [state, setState] = useState<PublicState>({ kind: slug ? "loading" : "missing" });
 
   useEffect(() => {

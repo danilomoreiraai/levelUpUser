@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 
 import { getLocalTheme, getMillisecondsUntilThemeBoundary } from "../shared/theme";
 
-export function useLocalTheme() {
-  const [theme, setTheme] = useState(() => getLocalTheme());
+export function useLocalAppearance() {
+  const [appearance, setAppearance] = useState(() => {
+    const now = new Date();
+    return { theme: getLocalTheme(now), year: now.getFullYear() };
+  });
 
   useEffect(() => {
     let timer: number;
@@ -11,8 +14,13 @@ export function useLocalTheme() {
     function refresh() {
       window.clearTimeout(timer);
       const now = new Date();
-      setTheme(getLocalTheme(now));
-      timer = window.setTimeout(refresh, getMillisecondsUntilThemeBoundary(now));
+      const year = now.getFullYear();
+      setAppearance({ theme: getLocalTheme(now), year });
+      const untilNewYear = new Date(year + 1, 0, 1).getTime() - now.getTime();
+      timer = window.setTimeout(
+        refresh,
+        Math.min(getMillisecondsUntilThemeBoundary(now), untilNewYear),
+      );
     }
 
     refresh();
@@ -25,5 +33,5 @@ export function useLocalTheme() {
     };
   }, []);
 
-  return theme;
+  return appearance;
 }

@@ -34,5 +34,6 @@ export type AdminPage = {
   published: boolean;
   slugLocked: boolean;
   hasClientLink?: boolean;
+  instagramLookupAvailable?: boolean;
   draft: Presentation;
 };

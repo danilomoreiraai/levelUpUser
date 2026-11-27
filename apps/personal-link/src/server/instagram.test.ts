@@ -60,3 +60,17 @@ it("rejects unsupported profiles and unsafe CDN destinations without requesting 
   await expect(lookup?.("atelier")).rejects.toMatchObject({ status: 502 });
   expect(request).toHaveBeenCalledTimes(2);
 });
+
+it.each([190, 10, 200])("reports expired or insufficient Meta authorization (%i)", async (code) => {
+  const request = vi
+    .fn<typeof fetch>()
+    .mockResolvedValue(
+      Response.json({ error: { code, message: "Private provider error" } }, { status: 400 }),
+    );
+  const lookup = createInstagramAvatarLookup(env, request);
+  await expect(lookup?.("atelier")).rejects.toMatchObject({
+    status: 503,
+    message: "A conexão com a Meta precisa ser atualizada. Você pode enviar uma foto.",
+  });
+  expect(request).toHaveBeenCalledTimes(1);
+});

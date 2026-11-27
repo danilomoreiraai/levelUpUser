@@ -556,6 +556,10 @@ p {
   object-fit: cover;
 }
 
+.image-selection--portrait img {
+  border-radius: 50%;
+}
+
 .presets {
   min-width: 0;
   margin: 0;
