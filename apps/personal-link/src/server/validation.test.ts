@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
+import { normalizeLinkUrl } from "../shared/normalizeLinkUrl.js";
 import { readImage } from "./images.js";
 import { readContent, readSlug } from "./validation.js";
 
@@ -22,6 +23,27 @@ describe("draft validation", () => {
     });
   });
 
+  it("adds HTTPS to bare addresses in both links and social networks", () => {
+    expect(
+      readContent({
+        ...draft,
+        links: [
+          { label: "Site", url: " google.com " },
+          { label: "Porta", url: "example.com:8443/site?q=1#section" },
+          { label: "HTTP", url: "http://example.com" },
+        ],
+        socials: [{ platform: "instagram", url: "instagram.com/example" }],
+      }),
+    ).toMatchObject({
+      links: [
+        { url: "https://google.com/" },
+        { url: "https://example.com:8443/site?q=1#section" },
+        { url: "http://example.com/" },
+      ],
+      socials: [{ url: "https://instagram.com/example" }],
+    });
+  });
+
   it.each(["admin", "api", "assets", "readyz", "na", "mídia", "a--b", "../../pagina"])(
     "rejects unsafe and reserved slug %s",
     (slug) => expect(() => readSlug(slug)).toThrow(),
@@ -30,12 +52,42 @@ describe("draft validation", () => {
   it.each([
     "javascript:alert(0)",
     "data:text/html,test",
+    "ftp://example.com",
+    "https:example.com",
     "https://user:pass@example.com",
+    "https://user@example.com",
+    "https://:pass@example.com",
+    "user@example.com",
+    "@example.com",
+    "example.com:",
+    "https://",
+    "",
     "//example.com",
+    "/example.com",
+    "arquivo",
     "https://exam ple.com",
     "https://example.com\\test",
+    "https://example.com/path\u0000value",
   ])("rejects link destination %s", (url) => {
     expect(() => readContent({ ...draft, links: [{ label: "Rejeitar", url }] })).toThrow();
+  });
+
+  it("finds the scheme only at the beginning of an address", () => {
+    expect(normalizeLinkUrl("example.com/?next=https://other.example")).toBe(
+      "https://example.com/?next=https://other.example",
+    );
+    expect(normalizeLinkUrl("https://")).toBeNull();
+  });
+
+  it("enforces the address length after adding the protocol and encoding characters", () => {
+    const prefix = "https://example.com/";
+    const longest = prefix + "a".repeat(2_048 - prefix.length);
+    const readLink = (url: string) => readContent({ ...draft, links: [{ label: "Site", url }] });
+    expect(readLink(longest).links[0].url).toBe(longest);
+    expect(readLink(longest.slice("https://".length)).links[0].url).toBe(longest);
+    expect(() => readLink(`${longest}a`)).toThrow();
+    expect(() => readLink(`${longest.slice(8)}á`)).toThrow();
+    expect(() => readLink(prefix + "./".repeat(1_024))).toThrow();
   });
 
   it("rejects out-of-range blur, incomplete handles and unknown platforms", () => {

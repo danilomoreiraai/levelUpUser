@@ -1,9 +1,18 @@
 import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 
 import { type AdminPage, type Presentation, platforms, presets } from "../shared/contracts";
-import { ApiError, changePublication, getErrorMessage, getPublicUrl, saveDraft } from "./api";
+import { normalizeLinkUrl } from "../shared/normalizeLinkUrl";
+import {
+  ApiError,
+  changePublication,
+  type EditorScope,
+  getErrorMessage,
+  getPublicUrl,
+  importInstagramAvatar,
+  saveDraft,
+} from "./api";
+import { ClientLinkControls } from "./ClientLinkControls";
 import { LinkPage } from "./LinkPage";
-import { originalArtwork } from "./originalArtwork";
 import { socialNames } from "./presentation";
 
 type LinkValues = Presentation["links"][number];
@@ -25,7 +34,7 @@ const maxImageSize = 5 * 1024 * 1024;
 const imageTypes = ["image/jpeg", "image/png", "image/webp"];
 const emptyUpload: UploadState = { busy: false, problem: "" };
 const presetNames: Record<Presentation["preset"], string> = {
-  original: "Modelo inicial",
+  original: "Original",
   neutral: "Neutro",
   sage: "Sálvia",
   dusk: "Crepúsculo",
@@ -219,11 +228,15 @@ function UrlField({
         autoCapitalize="none"
         inputMode="url"
         maxLength={2048}
+        onBlur={(event) => {
+          const normalized = normalizeLinkUrl(event.currentTarget.value);
+          if (normalized && normalized !== value) onChange(normalized);
+        }}
         onChange={(event) => onChange(event.currentTarget.value)}
-        placeholder="https://"
+        placeholder="exemplo.com"
         required
         spellCheck={false}
-        type="url"
+        type="text"
         value={value}
       />
     </label>
@@ -232,16 +245,18 @@ function UrlField({
 
 export function PageEditor({
   initialPage,
-  onAdminError,
+  onAccessError,
   onBack,
   onEditingChange,
   onReload,
+  scope = "admin",
 }: {
   initialPage: AdminPage;
-  onAdminError: (error: unknown) => boolean;
-  onBack: () => void;
-  onEditingChange: (state: { busy: boolean; dirty: boolean }) => void;
+  onAccessError: (error: unknown) => boolean;
+  onBack?: () => void;
+  onEditingChange?: (state: { busy: boolean; dirty: boolean }) => void;
   onReload: () => void;
+  scope?: EditorScope;
 }) {
   const [page, setPage] = useState(initialPage);
   const [draft, setDraft] = useState(() => toDraft(initialPage));
@@ -251,6 +266,7 @@ export function PageEditor({
     backgroundImage: emptyUpload,
   });
   const [pending, setPending] = useState<"save" | "publish" | "unpublish" | null>(null);
+  const [accessPending, setAccessPending] = useState(false);
   const [problem, setProblem] = useState("");
   const [conflict, setConflict] = useState(false);
   const [notice, setNotice] = useState("");
@@ -258,13 +274,14 @@ export function PageEditor({
   const heading = useRef<HTMLHeadingElement>(null);
   const nextId = useRef(maxLinks + maxSocials);
   const rowToFocus = useRef<number | null>(null);
-  const busy = uploads.avatar.busy || uploads.backgroundImage.busy || pending !== null;
+  const busy =
+    uploads.avatar.busy || uploads.backgroundImage.busy || pending !== null || accessPending;
 
   useEffect(() => {
     heading.current?.focus();
-    return () => onEditingChange({ busy: false, dirty: false });
+    return () => onEditingChange?.({ busy: false, dirty: false });
   }, [onEditingChange]);
-  useEffect(() => onEditingChange({ busy, dirty }), [onEditingChange, busy, dirty]);
+  useEffect(() => onEditingChange?.({ busy, dirty }), [onEditingChange, busy, dirty]);
   useEffect(() => {
     if (!dirty && !busy) return;
     function preventExit(event: BeforeUnloadEvent) {
@@ -330,33 +347,34 @@ export function PageEditor({
     }
   }
 
-  async function selectOriginalPortrait() {
+  async function selectInstagramPortrait() {
     setUploadState("avatar", { busy: true, problem: "" });
     try {
-      const response = await fetch(originalArtwork.light.avatar);
-      if (!response.ok) throw new Error("Could not load the template image");
-      setImage("avatar", await readImage(await response.blob()));
-    } catch {
-      setUploadState("avatar", {
-        busy: false,
-        problem: "Não foi possível carregar a foto do modelo.",
-      });
+      const image = await importInstagramAvatar(page.id, draft.handle, scope);
+      setImage("avatar", image);
+    } catch (error) {
+      if (onAccessError(error)) return;
+      setUploadState("avatar", { busy: false, problem: getErrorMessage(error) });
     }
   }
 
   async function persist() {
     const { slug, handle, preset, blur, links, socials, avatar, backgroundImage } = draft;
-    const saved = await saveDraft(page.id, {
-      slug,
-      handle,
-      preset,
-      blur,
-      avatar,
-      backgroundImage,
-      revision: page.revision,
-      links: links.map(({ label, url }) => ({ label, url })),
-      socials: socials.map(({ platform, url }) => ({ platform, url })),
-    });
+    const saved = await saveDraft(
+      page.id,
+      {
+        slug,
+        handle,
+        preset,
+        blur,
+        avatar,
+        backgroundImage,
+        revision: page.revision,
+        links: links.map(({ label, url }) => ({ label, url })),
+        socials: socials.map(({ platform, url }) => ({ platform, url })),
+      },
+      scope,
+    );
     setPage(saved);
     setDraft(toDraft(saved));
     setDirty(false);
@@ -378,7 +396,7 @@ export function PageEditor({
       }
 
       const current = action === "publish" && dirty ? await persist() : page;
-      const updated = await changePublication(current.id, action, current.revision);
+      const updated = await changePublication(current.id, action, current.revision, scope);
       setPage(updated);
       if (action === "publish") {
         setDraft(toDraft(updated));
@@ -386,7 +404,7 @@ export function PageEditor({
       }
       setNotice(action === "publish" ? "Página publicada." : "Página despublicada.");
     } catch (error) {
-      if (onAdminError(error)) return;
+      if (onAccessError(error)) return;
       setProblem(getErrorMessage(error));
       setConflict(error instanceof ApiError && error.status === 409);
     } finally {
@@ -420,16 +438,18 @@ export function PageEditor({
 
   return (
     <>
-      <button
-        className="button button--quiet workspace-back"
-        disabled={busy}
-        onClick={() => {
-          if (!dirty || window.confirm("Voltar sem salvar as alterações?")) onBack();
-        }}
-        type="button"
-      >
-        ← Minhas páginas
-      </button>
+      {onBack && (
+        <button
+          className="button button--quiet workspace-back"
+          disabled={busy}
+          onClick={() => {
+            if (!dirty || window.confirm("Voltar sem salvar as alterações?")) onBack();
+          }}
+          type="button"
+        >
+          ← Minhas páginas
+        </button>
+      )}
 
       <div className="workspace-title editor-title">
         <h1 ref={heading} tabIndex={-1}>
@@ -445,13 +465,14 @@ export function PageEditor({
 
       <div className="editor-grid">
         <form className="editor-form" onSubmit={submit} aria-busy={busy}>
-          <fieldset className="editor-fields" disabled={pending !== null}>
+          <fieldset className="editor-fields" disabled={pending !== null || accessPending}>
             <section className="panel editor-section" aria-labelledby="profile-title">
               <h2 id="profile-title">Perfil</h2>
               <label className="field">
                 <span>Nome de usuário (@)</span>
                 <input
                   autoCapitalize="none"
+                  disabled={uploads.avatar.busy}
                   maxLength={65}
                   onChange={(event) => update({ handle: event.currentTarget.value })}
                   placeholder="@seunome"
@@ -474,22 +495,14 @@ export function PageEditor({
                 state={uploads.avatar}
                 url={draft.avatarUrl}
               />
-              {draft.preset === "original" && (
-                <div className="form-field">
-                  <button
-                    className="button"
-                    type="button"
-                    onClick={() => void selectOriginalPortrait()}
-                  >
-                    Usar foto do modelo
-                  </button>
-                  {!draft.avatarUrl && (
-                    <p className="field-hint">
-                      Selecione a foto do modelo para usá-la na publicação.
-                    </p>
-                  )}
-                </div>
-              )}
+              <button
+                className="button"
+                disabled={uploads.avatar.busy || !draft.handle.trim()}
+                type="button"
+                onClick={() => void selectInstagramPortrait()}
+              >
+                {uploads.avatar.busy ? "Carregando foto…" : "Buscar foto do Instagram"}
+              </button>
             </section>
 
             <section className="panel editor-section" aria-labelledby="links-title">
@@ -616,7 +629,7 @@ export function PageEditor({
             <section className="panel editor-section" aria-labelledby="background-title">
               <h2 id="background-title">Plano de fundo</h2>
               <fieldset className="presets">
-                <legend>Modelo de fundo</legend>
+                <legend>Paleta de cores</legend>
                 <div className="preset-options">
                   {presets.map((preset) => (
                     <label key={preset} className="preset-option">
@@ -646,7 +659,6 @@ export function PageEditor({
                     Desfoque do fundo <span aria-hidden="true">{draft.blur} px</span>
                   </span>
                   <input
-                    disabled={!draft.backgroundUrl && draft.preset !== "original"}
                     max={24}
                     min={0}
                     onChange={(event) => update({ blur: event.currentTarget.valueAsNumber })}
@@ -707,6 +719,19 @@ export function PageEditor({
               </div>
             )}
           </section>
+          {scope === "admin" && (
+            <ClientLinkControls
+              active={Boolean(page.hasClientLink)}
+              disabled={busy}
+              id={page.id}
+              onAccessChange={(hasClientLink) =>
+                setPage((current) => ({ ...current, hasClientLink }))
+              }
+              onError={onAccessError}
+              onPendingChange={setAccessPending}
+              pending={accessPending}
+            />
+          )}
           <div className="editor-notices" aria-live="polite" aria-atomic="true">
             {notice && <p className="notice notice--success">{notice}</p>}
             {copyNotice && <p className="notice">{copyNotice}</p>}

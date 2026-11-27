@@ -7,6 +7,8 @@ export type DraftRequest = Omit<Presentation, "avatarUrl" | "backgroundUrl"> & {
   backgroundImage?: string | null;
 };
 
+export type EditorScope = "admin" | "client";
+
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
@@ -43,8 +45,8 @@ function json(method: "POST" | "PUT", body: unknown): RequestInit {
   return { method, body: JSON.stringify(body), headers: { "Content-Type": "application/json" } };
 }
 
-function pagePath(id: string): string {
-  return `/api/admin/pages/${encodeURIComponent(id)}`;
+function pagePath(id: string, scope: EditorScope = "admin"): string {
+  return `/api/${scope}/pages/${encodeURIComponent(id)}`;
 }
 
 export async function checkSession(signal: AbortSignal): Promise<void> {
@@ -67,22 +69,62 @@ export async function createPage(slug: string): Promise<AdminPage> {
   return (await request("/api/admin/pages", json("POST", { slug }))).json() as Promise<AdminPage>;
 }
 
-export function loadPage(id: string, signal: AbortSignal): Promise<AdminPage> {
-  return read(pagePath(id), signal);
+export function loadPage(id: string, signal: AbortSignal, scope?: EditorScope): Promise<AdminPage> {
+  return read(pagePath(id, scope), signal);
 }
 
-export async function saveDraft(id: string, draft: DraftRequest): Promise<AdminPage> {
-  return (await request(`${pagePath(id)}/draft`, json("PUT", draft))).json() as Promise<AdminPage>;
+export async function saveDraft(
+  id: string,
+  draft: DraftRequest,
+  scope?: EditorScope,
+): Promise<AdminPage> {
+  return (
+    await request(`${pagePath(id, scope)}/draft`, json("PUT", draft))
+  ).json() as Promise<AdminPage>;
 }
 
 export async function changePublication(
   id: string,
   action: "publish" | "unpublish",
   revision: number,
+  scope?: EditorScope,
 ): Promise<AdminPage> {
   return (
-    await request(`${pagePath(id)}/${action}`, json("POST", { revision }))
+    await request(`${pagePath(id, scope)}/${action}`, json("POST", { revision }))
   ).json() as Promise<AdminPage>;
+}
+
+export async function issueClientLink(id: string): Promise<string> {
+  const response = await request(`${pagePath(id)}/client-link`, { method: "POST" });
+  const { token } = (await response.json()) as { token: string };
+  const url = new URL(`/edit/${encodeURIComponent(id)}`, window.location.origin);
+  url.hash = token;
+  return url.href;
+}
+
+export async function revokeClientLink(id: string): Promise<void> {
+  await request(`${pagePath(id)}/client-link`, { method: "DELETE" });
+}
+
+export async function openClientSession(
+  id: string,
+  token: string,
+  signal: AbortSignal,
+): Promise<void> {
+  await request(`${pagePath(id, "client")}/session`, { ...json("POST", { token }), signal });
+}
+
+export async function importInstagramAvatar(
+  id: string,
+  handle: string,
+  scope: EditorScope,
+): Promise<string> {
+  const response = await request(
+    `${pagePath(id, scope)}/instagram-avatar`,
+    json("POST", { handle }),
+  );
+  const { image } = (await response.json()) as { image: string };
+  return image;
 }
 
 export function loadPublicPage(slug: string, signal: AbortSignal): Promise<Presentation> {

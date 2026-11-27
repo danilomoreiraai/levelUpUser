@@ -59,21 +59,34 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   await expect(page.getByRole("heading", { name: "Editar página" })).toBeFocused();
 
   const preview = page.getByRole("region", { name: "Prévia da página de links" });
-  await expect(page.getByRole("radio", { name: "Modelo inicial" })).toBeChecked();
+  await expect(page.getByRole("radio", { name: "Original" })).toBeChecked();
   await expect(preview).toHaveAttribute("data-preset", "original");
-  const samplePhoto = preview.getByRole("img", { name: "Foto de exemplo do modelo" });
-  await expect(samplePhoto).toBeVisible();
+  const placeholder = preview.locator(".original-avatar--placeholder");
+  await expect(placeholder).toBeVisible();
+  await expect(preview.locator("img.original-avatar")).toHaveCount(0);
   const originalBackground = preview.locator(".original-background img");
   await expect
     .poll(() => originalBackground.evaluate((image: HTMLImageElement) => image.naturalWidth))
     .toBeGreaterThan(0);
   await page.getByRole("slider", { name: "Desfoque do fundo" }).fill("6");
   await expect(originalBackground).toHaveCSS("filter", "blur(6px)");
-  await page.getByRole("button", { name: "Usar foto do modelo" }).click();
-  await expect(page.getByRole("button", { name: "Remover foto de perfil" })).toBeVisible();
-  await expect(samplePhoto).toHaveCount(0);
+  for (const [label, palette] of [
+    ["Neutro", "neutral"],
+    ["Sálvia", "sage"],
+    ["Crepúsculo", "dusk"],
+  ]) {
+    await page.getByRole("radio", { name: label }).check();
+    await expect(preview).toHaveAttribute("data-preset", palette);
+    await expect(placeholder).toBeVisible();
+    await expect(preview.locator(".original-theme-knob")).toBeVisible();
+    await expect(originalBackground).toHaveCSS("filter", "blur(6px)");
+  }
+  await page.getByRole("radio", { name: "Original" }).check();
 
   await page.getByLabel("Nome de usuário (@)").fill("atelier-ficticio");
+  await page.getByRole("button", { name: "Buscar foto do Instagram" }).click();
+  await expect(page.getByRole("alert")).toContainText("Busca do Instagram indisponível");
+  await expect(placeholder).toBeVisible();
   const upload = { name: "fundo-ficticio.png", mimeType: "image/png", buffer: image };
   await page.getByLabel("Foto de perfil", { exact: true }).setInputFiles(upload);
   await page.getByLabel("Imagem de fundo", { exact: true }).setInputFiles(upload);
@@ -82,7 +95,9 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   await blur.fill("12");
   await page.getByRole("button", { name: "Adicionar link" }).click();
   await page.getByLabel("Título do link 1").fill("Meu site");
-  await page.getByLabel("URL do link 1").fill("https://example.com/");
+  await page.getByLabel("URL do link 1").fill("google.com");
+  await page.getByLabel("URL do link 1").press("Tab");
+  await expect(page.getByLabel("URL do link 1")).toHaveValue("https://google.com/");
   await page.getByRole("button", { name: "Adicionar link" }).click();
   await page.getByLabel("Título do link 2").fill("Portfólio");
   await page.getByLabel("URL do link 2").fill("https://example.com/portfolio");
@@ -92,7 +107,7 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   await page
     .getByRole("combobox", { name: "Rede social 1", exact: true })
     .selectOption("instagram");
-  await page.getByLabel("URL da rede social 1").fill("https://example.com/social");
+  await page.getByLabel("URL da rede social 1").fill("example.com/social");
 
   await expect(preview.getByRole("heading", { name: "@atelier-ficticio" })).toBeVisible();
   await expect
@@ -135,7 +150,7 @@ test("edits, previews and publishes a shareable page on the visitor's local them
       await expect(surface).toHaveAttribute("data-theme", visitor.initial);
       await expect(surface.getByRole("link", { name: "Meu site" })).toHaveAttribute(
         "href",
-        "https://example.com/",
+        "https://google.com/",
       );
       await expect(surface.getByRole("link", { name: "Instagram" })).toHaveAttribute(
         "href",
@@ -169,5 +184,66 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   await expect(page.getByText("Página despublicada.", { exact: true })).toBeVisible();
   for (const url of [publicPath, apiPath, initialAvatar, initialBackground]) {
     expect((await page.request.get(url)).status()).toBe(404);
+  }
+});
+
+test("shares single-page editing without granting administrator access", async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  const slug = `cliente-${randomUUID()}`;
+  const publicPath = `/api/public/pages/${slug}`;
+  await page.goto("/admin");
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.getByLabel("Senha do painel").fill(password);
+  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByLabel("Endereço da página").fill(slug);
+  await page.getByRole("button", { name: "Criar página" }).click();
+  await page.getByRole("button", { name: "Gerar link de edição" }).click();
+
+  const address = page.getByLabel("Endereço de edição do cliente");
+  await expect(address).toHaveValue(/\/edit\/[\da-f-]{36}#[\w-]{43}$/u);
+  const clientLink = await address.inputValue();
+  await page.getByRole("button", { name: "Copiar link de edição" }).click();
+  await expect(page.getByText("Link de edição copiado.", { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(clientLink);
+
+  const viewport = page.viewportSize() ?? undefined;
+  const client = await browser.newContext({ baseURL, viewport });
+  try {
+    const editor = await client.newPage();
+    await editor.goto(clientLink);
+    await expect(editor.getByRole("heading", { name: "Editar página" })).toBeFocused();
+    await expect(editor).toHaveURL(new URL(clientLink).href.split("#")[0]);
+    await expect(editor.getByRole("button", { name: "Gerar link de edição" })).toHaveCount(0);
+    await expect(editor.getByLabel("Senha do painel")).toHaveCount(0);
+    expect((await editor.request.get("/api/admin/pages")).status()).toBe(401);
+
+    await editor.getByLabel("Nome de usuário (@)").fill("@cliente-ficticio");
+    await editor.getByRole("button", { name: "Adicionar link" }).click();
+    await editor.getByLabel("Título do link 1").fill("Meu site");
+    await editor.getByLabel("URL do link 1").fill("google.com");
+    await editor.getByRole("button", { name: "Publicar página" }).click();
+    await expect(editor.getByText("Página publicada.", { exact: true })).toBeVisible();
+    expect(await (await editor.request.get(publicPath)).json()).toMatchObject({
+      handle: "cliente-ficticio",
+      links: [{ label: "Meu site", url: "https://google.com/" }],
+    });
+
+    await editor.reload();
+    await expect(editor.getByLabel("Nome de usuário (@)")).toHaveValue("cliente-ficticio");
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "Revogar link de edição" }).click();
+    await expect(page.getByText("Link de edição revogado.", { exact: true })).toBeVisible();
+
+    const unavailable = editor.getByRole("heading", { name: "Link de edição indisponível" });
+    await editor.reload();
+    await expect(unavailable).toBeVisible();
+    await editor.goto(clientLink);
+    await expect(unavailable).toBeVisible();
+    expect((await editor.request.get(publicPath)).status()).toBe(200);
+  } finally {
+    await client.close();
   }
 });

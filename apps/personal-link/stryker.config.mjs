@@ -1,5 +1,5 @@
 export default {
-  mutate: ["src/shared/theme.ts", "src/server/publication.ts"],
+  mutate: ["src/shared/theme.ts", "src/server/publication.ts", "src/shared/normalizeLinkUrl.ts"],
   testRunner: "vitest",
   reporters: ["clear-text", "progress"],
   thresholds: { high: 80, low: 60, break: 60 },

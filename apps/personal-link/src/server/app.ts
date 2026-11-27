@@ -3,10 +3,11 @@ import cookies from "@fastify/cookie";
 import helmet from "@fastify/helmet";
 import staticFiles from "@fastify/static";
 import Fastify, { type FastifyReply, type FastifyRequest, LogController } from "fastify";
-import { newSessionToken, readPasswordHash, sessionDurationSeconds } from "./auth.js";
-import type { Database } from "./database.js";
+import { digest, newSessionToken, readPasswordHash, sessionDurationSeconds } from "./auth.js";
+import type { Database, EditorAccess } from "./database.js";
 import { RequestError } from "./errors.js";
 import { readImage } from "./images.js";
+import { instagramUsername } from "./instagram.js";
 import { object, readContent, readRevision, readSlug, validSlug } from "./validation.js";
 
 type Options = {
@@ -17,7 +18,10 @@ type Options = {
   clientDirectory?: string;
   logger?: boolean;
   trustedProxies?: string[];
+  instagramAvatar?: (username: string) => Promise<string>;
 };
+
+type PageParams = { id: string };
 
 const uuid = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
 const tokenFormat = /^[\w-]{43}$/u;
@@ -33,6 +37,13 @@ function publicSlug(value: string): string {
   return value;
 }
 
+function readClientToken(value: unknown): string {
+  if (typeof value !== "string" || !tokenFormat.test(value)) {
+    throw new RequestError(401, "Este link de edição é inválido ou foi revogado.");
+  }
+  return value;
+}
+
 async function sendMedia(reply: FastifyReply, content: Buffer | null) {
   if (!content) throw new RequestError(404, "Imagem não encontrada.");
   return reply.type("image/webp").send(content);
@@ -43,6 +54,9 @@ export async function createApp(options: Options) {
   const password = readPasswordHash(options.passwordHash);
   const secureCookies = origin.startsWith("https://");
   const sessionName = secureCookies ? "__Host-personal_link_session" : "personal_link_session";
+  const clientSessionName = secureCookies
+    ? "__Secure-personal_link_client"
+    : "personal_link_client";
   const app = Fastify({
     logger: options.logger ?? false,
     trustProxy: options.trustedProxies ?? false,
@@ -175,48 +189,114 @@ export async function createApp(options: Options) {
     const page = await database.createPage(readSlug(object(request.body).slug));
     return reply.code(201).send(page);
   });
-  app.get<{ Params: { id: string } }>("/api/admin/pages/:id", protectedRoute, async (request) => {
-    const page = await database.getAdminPage(readId(request.params.id));
-    if (!page) throw new RequestError(404, "Página não encontrada.");
-    return page;
-  });
-  app.put<{ Params: { id: string } }>(
-    "/api/admin/pages/:id/draft",
-    { ...protectedRoute, bodyLimit: 15 * 1024 * 1024 },
+  app.post<{ Params: PageParams }>(
+    "/api/admin/pages/:id/client-link",
+    protectedRoute,
     async (request) => {
-      const id = readId(request.params.id);
-      const body = object(request.body);
-      const revision = readRevision(body.revision);
-      const slug = readSlug(body.slug);
-      const content = readContent(body);
-      const avatar = await readImage(body.avatar, "avatar");
-      const background = await readImage(body.backgroundImage, "background");
-      return database.saveDraft(id, revision, slug, content, avatar, background);
+      const token = newSessionToken();
+      await database.setClientLink(readId(request.params.id), digest(token));
+      return { token };
+    },
+  );
+  app.delete<{ Params: PageParams }>(
+    "/api/admin/pages/:id/client-link",
+    protectedRoute,
+    async (request, reply) => {
+      await database.setClientLink(readId(request.params.id), null);
+      return reply.code(204).send();
     },
   );
 
-  for (const action of ["publish", "unpublish"] as const) {
-    app.post<{ Params: { id: string } }>(
-      `/api/admin/pages/:id/${action}`,
-      protectedRoute,
-      async (request) =>
+  function clientDigest(request: FastifyRequest): Buffer {
+    return digest(readClientToken(request.cookies[clientSessionName]));
+  }
+
+  app.post<{ Params: PageParams }>(
+    "/api/client/pages/:id/session",
+    { bodyLimit: 4_096 },
+    async (request, reply) => {
+      const id = readId(request.params.id);
+      const token = readClientToken(object(request.body).token);
+      await database.requireClientAccess(id, digest(token));
+      return reply
+        .setCookie(clientSessionName, token, {
+          ...sessionCookie,
+          path: `/api/client/pages/${id}`,
+          maxAge: sessionDurationSeconds,
+        })
+        .code(204)
+        .send();
+    },
+  );
+
+  function registerEditorRoutes(scope: "admin" | "client") {
+    const base = `/api/${scope}/pages/:id`;
+    const onRequest = async (request: FastifyRequest<{ Params: PageParams }>) => {
+      if (scope === "admin") return requireSession(request);
+      await database.requireClientAccess(readId(request.params.id), clientDigest(request));
+    };
+    const access = (request: FastifyRequest): EditorAccess =>
+      scope === "admin" ? "admin" : clientDigest(request);
+
+    app.get<{ Params: PageParams }>(base, { onRequest }, async (request) =>
+      database.getEditorPage(readId(request.params.id), access(request)),
+    );
+    app.post<{ Params: PageParams }>(
+      `${base}/instagram-avatar`,
+      { onRequest, bodyLimit: 512 },
+      async (request) => {
+        if (scope === "admin") await database.getEditorPage(readId(request.params.id), "admin");
+        if (!options.instagramAvatar) {
+          throw new RequestError(
+            503,
+            "Busca do Instagram indisponível. Você pode enviar uma foto.",
+          );
+        }
+        const username = instagramUsername(object(request.body).handle);
+        return { image: await options.instagramAvatar(username) };
+      },
+    );
+    app.put<{ Params: PageParams }>(
+      `${base}/draft`,
+      { onRequest, bodyLimit: 15 * 1024 * 1024 },
+      async (request) => {
+        const id = readId(request.params.id);
+        const body = object(request.body);
+        const revision = readRevision(body.revision);
+        const slug = readSlug(body.slug);
+        const content = readContent(body);
+        const avatar = await readImage(body.avatar, "avatar");
+        const background = await readImage(body.backgroundImage, "background");
+        return database.saveDraft(id, revision, slug, content, avatar, background, access(request));
+      },
+    );
+    for (const action of ["publish", "unpublish"] as const) {
+      app.post<{ Params: PageParams }>(`${base}/${action}`, { onRequest }, async (request) =>
         database.changePublication(
           readId(request.params.id),
           readRevision(object(request.body).revision),
           action,
+          access(request),
+        ),
+      );
+    }
+    app.get<{ Params: PageParams & { media: string } }>(
+      `${base}/media/:media`,
+      { onRequest },
+      async (request, reply) =>
+        sendMedia(
+          reply,
+          await database.getEditorMedia(
+            readId(request.params.id),
+            readId(request.params.media),
+            access(request),
+          ),
         ),
     );
   }
+  registerEditorRoutes("admin");
+  registerEditorRoutes("client");
 
-  app.get<{ Params: { id: string; media: string } }>(
-    "/api/admin/pages/:id/media/:media",
-    protectedRoute,
-    async (request, reply) =>
-      sendMedia(
-        reply,
-        await database.getAdminMedia(readId(request.params.id), readId(request.params.media)),
-      ),
-  );
   app.get<{ Params: { slug: string } }>("/api/public/pages/:slug", async (request) => {
     const page = await database.getPublicPage(publicSlug(request.params.slug));
     if (!page) throw new RequestError(404, "Página não encontrada.");
@@ -261,13 +341,14 @@ export async function createApp(options: Options) {
       return reply.sendFile("index.html", directory, { cacheControl: false });
     }
 
-    const adminShell = async (_request: FastifyRequest, reply: FastifyReply) => {
+    const editorShell = async (_request: FastifyRequest, reply: FastifyReply) => {
       reply.header("X-Robots-Tag", "noindex");
       return sendShell(reply);
     };
     app.get("/", async (_request, reply) => reply.redirect("/admin"));
-    app.get("/admin", adminShell);
-    app.get("/admin/*", adminShell);
+    app.get("/admin", editorShell);
+    app.get("/admin/*", editorShell);
+    app.get("/edit/:id", editorShell);
     app.get<{ Params: { slug: string } }>("/:slug", async (request, reply) => {
       const { slug } = request.params;
       if (!validSlug(slug) || !(await database.getPublicPage(slug))) {

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { type CSSProperties, useRef, useState } from "react";
 
 import type { Presentation } from "../shared/contracts";
 import type { LocalTheme } from "../shared/theme";
@@ -21,18 +21,24 @@ const socialIcons: Record<Platform, string> = {
   other: "↗",
 };
 
-function SocialLabel({ original, platform }: { original: boolean; platform: Platform }) {
+function SocialLabel({ platform }: { platform: Platform }) {
   const icon =
-    original && (platform === "instagram" || platform === "youtube")
-      ? originalSocialIcons[platform]
-      : null;
+    platform === "instagram" || platform === "youtube" ? originalSocialIcons[platform] : null;
 
   return (
     <>
-      <span aria-hidden="true" className={`social-icon social-icon--${platform}`}>
-        {icon ? <img alt="" height={24} src={icon} width={24} /> : socialIcons[platform]}
+      <span aria-hidden="true" className="original-social-icon">
+        {icon ? (
+          <svg aria-hidden="true" fill="currentColor" height={24} viewBox="0 0 512 512" width={24}>
+            {icon.map((shape) => (
+              <path d={shape} key={shape} />
+            ))}
+          </svg>
+        ) : (
+          socialIcons[platform]
+        )}
       </span>
-      <span className={original ? "visually-hidden" : undefined}>{socialNames[platform]}</span>
+      <span className="visually-hidden">{socialNames[platform]}</span>
     </>
   );
 }
@@ -45,6 +51,37 @@ function identifyRows<T>(items: T[], describe: (item: T) => string[]) {
     occurrences.set(descriptor, occurrence);
     return { item, key: `${descriptor}-${occurrence}` };
   });
+}
+
+function OriginalFooter({
+  presentation,
+  preview,
+}: {
+  presentation: Presentation;
+  preview: boolean;
+}) {
+  const name = presentation.handle
+    .replace(/^@+/, "")
+    .replace(/[._-]+/g, " ")
+    .trim();
+  const displayName = name.replace(/(^| )\p{L}/gu, (letter) => letter.toLocaleUpperCase("pt-BR"));
+  const instagram = presentation.socials.find((social) => social.platform === "instagram");
+
+  if (!displayName) return null;
+
+  return (
+    <footer className="original-footer">
+      Feito com ♥ 2025 ©{" "}
+      {instagram && !preview ? (
+        <a href={instagram.url} rel="noreferrer" target="_blank">
+          {displayName}
+        </a>
+      ) : (
+        <span className={instagram ? "original-footer-link" : undefined}>{displayName}</span>
+      )}
+      . Todos os direitos reservados.
+    </footer>
+  );
 }
 
 export function LinkPage({
@@ -60,18 +97,15 @@ export function LinkPage({
   const theme = override ?? autoTheme;
   const targetTheme = theme === "dark" ? "light" : "dark";
   const themeLabel = targetTheme === "dark" ? "Tema escuro" : "Tema claro";
-  const original = presentation.preset === "original";
   const artwork = originalArtwork[theme];
-  const showExamplePortrait = original && preview && !presentation.avatarUrl;
-  const avatar = showExamplePortrait ? artwork.avatar : presentation.avatarUrl;
+  const avatar = presentation.avatarUrl;
   const backgroundStyle = { filter: `blur(${presentation.blur}px)` };
   const handle = formatHandle(presentation.handle);
   const Display = preview ? "section" : "main";
   const Title = preview ? "h3" : "h1";
-
   return (
     <Display
-      className={`link-page${preview ? " link-page--preview" : ""}`}
+      className={`original-link-page${preview ? " original-link-page--preview" : ""}`}
       data-theme={theme}
       data-preset={presentation.preset}
       aria-label={preview ? "Prévia da página de links" : undefined}
@@ -79,6 +113,7 @@ export function LinkPage({
       {presentation.backgroundUrl ? (
         <img
           className="link-background"
+          data-blurred={presentation.blur > 0}
           src={presentation.backgroundUrl}
           alt=""
           aria-hidden="true"
@@ -86,63 +121,50 @@ export function LinkPage({
           style={backgroundStyle}
         />
       ) : (
-        original && (
-          <picture className="original-background">
-            <source media="(min-width: 700px)" srcSet={artwork.desktop} />
-            <img
-              className="link-background"
-              src={artwork.mobile}
-              alt=""
-              fetchPriority={preview ? "low" : undefined}
-              style={backgroundStyle}
-            />
-          </picture>
-        )
+        <picture
+          className="original-background"
+          data-blurred={presentation.blur > 0}
+          style={
+            {
+              "--original-mobile-background": `url("${artwork.mobile}")`,
+              "--original-desktop-background": `url("${artwork.desktop}")`,
+            } as CSSProperties
+          }
+        >
+          {!preview && <source media="(min-width: 700px)" srcSet={artwork.desktop} />}
+          <img
+            className="link-background"
+            data-blurred={presentation.blur > 0}
+            src={artwork.mobile}
+            alt=""
+            fetchPriority={preview ? "low" : undefined}
+            style={backgroundStyle}
+          />
+        </picture>
       )}
-      <div className="link-content">
-        <div className="link-profile">
+      <div className="original-container">
+        <div className="original-profile">
           {avatar ? (
-            <img
-              className="link-avatar"
-              src={avatar}
-              alt={showExamplePortrait ? "Foto de exemplo do modelo" : ""}
-              width={original ? 112 : 96}
-              height={original ? 112 : 96}
-            />
+            <img className="original-avatar" src={avatar} alt="" width={112} height={112} />
           ) : (
-            <span className="link-avatar link-avatar--placeholder" aria-hidden="true">
-              {handle === "Seu @" ? "@" : [...handle][1]?.toLocaleUpperCase("pt-BR")}
-            </span>
+            <span className="original-avatar original-avatar--placeholder" aria-hidden="true" />
           )}
           <Title>{handle}</Title>
         </div>
 
-        <div className="link-theme">
+        <div className="original-switch">
           <button
             aria-label={themeLabel}
-            className={original ? "theme-button original-theme-switch" : "theme-button"}
+            className="original-theme-knob"
             onClick={() => setOverride(targetTheme)}
             ref={toggle}
+            style={{ backgroundImage: `url("${artwork.themeIcon}")` }}
             type="button"
-          >
-            {original ? (
-              <img
-                className="original-theme-knob"
-                alt=""
-                src={artwork.themeIcon}
-                width={32}
-                height={32}
-              />
-            ) : (
-              <>
-                <span aria-hidden="true">{targetTheme === "dark" ? "☾" : "☀"}</span>
-                {themeLabel}
-              </>
-            )}
-          </button>
+          />
+          <span aria-hidden="true" className="original-theme-track" />
           {override && (
             <button
-              className="theme-reset"
+              className="original-theme-reset"
               onClick={() => {
                 setOverride(null);
                 toggle.current?.focus();
@@ -155,14 +177,14 @@ export function LinkPage({
         </div>
 
         {presentation.links.length > 0 ? (
-          <ul className="link-stack" aria-label="Links">
+          <ul className="original-links" aria-label="Links">
             {identifyRows(presentation.links, ({ label, url }) => [label, url]).map(
               ({ item: link, key }) => (
                 <li key={key}>
                   {preview ? (
-                    <span className="public-link">{link.label}</span>
+                    <span className="original-link">{link.label}</span>
                   ) : (
-                    <a className="public-link" href={link.url} rel="noreferrer" target="_blank">
+                    <a className="original-link" href={link.url} rel="noreferrer" target="_blank">
                       {link.label}
                     </a>
                   )}
@@ -171,21 +193,26 @@ export function LinkPage({
             )}
           </ul>
         ) : (
-          preview && <p className="link-empty">Seus links aparecem aqui.</p>
+          preview && <p className="original-empty">Seus links aparecem aqui.</p>
         )}
 
         {presentation.socials.length > 0 && (
-          <ul className="social-stack" aria-label="Redes sociais">
+          <ul className="original-socials" aria-label="Redes sociais">
             {identifyRows(presentation.socials, ({ platform, url }) => [platform, url]).map(
               ({ item: social, key }) => (
                 <li key={key}>
                   {preview ? (
-                    <span className="public-social">
-                      <SocialLabel original={original} platform={social.platform} />
+                    <span className="original-social">
+                      <SocialLabel platform={social.platform} />
                     </span>
                   ) : (
-                    <a className="public-social" href={social.url} rel="noreferrer" target="_blank">
-                      <SocialLabel original={original} platform={social.platform} />
+                    <a
+                      className="original-social"
+                      href={social.url}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <SocialLabel platform={social.platform} />
                     </a>
                   )}
                 </li>
@@ -193,6 +220,7 @@ export function LinkPage({
             )}
           </ul>
         )}
+        <OriginalFooter presentation={presentation} preview={preview} />
       </div>
     </Display>
   );

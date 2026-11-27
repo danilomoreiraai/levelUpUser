@@ -4,6 +4,16 @@ O painel em `/admin` administra várias páginas com uma conta. Visitantes abrem
 pelo endereço `/<slug>`. A separação entre rascunho e publicação também vale para as imagens. A
 composição da página pública segue o [modelo julianaLinktree](https://github.com/danilomoreiraai/julianaLinktree).
 
+## Edição com o cliente
+
+Abra uma página em `/admin` e, na seção **Acesso do cliente**, selecione **Gerar link de edição**.
+Copie o endereço completo e envie-o ao cliente, que pode editar o rascunho, publicar ou retirar do
+ar somente essa página. O endereço público continua separado. O painel mostra o endereço de edição
+quando ele é gerado. Guarde-o para reenviar ou gere um novo. Gerar outro link ou revogar o atual
+encerra o acesso pelo endereço anterior, inclusive para quem já tinha aberto o editor.
+
+O editor acrescenta `https://` a endereços como `google.com` e preserva o protocolo quando informado.
+
 ## Execução local
 
 Use Node.js 24 e um banco PostgreSQL 18 dedicado. A partir de `apps/personal-link`:
@@ -78,3 +88,14 @@ verifique `/release.json`. Em uma primeira publicação do editor, pare somente 
 para preservar o volume e os backups. Em versões seguintes, use o digest anterior quando
 compatível com o esquema atual do banco. Teste em uma cópia isolada qualquer restauração de
 dados necessária.
+
+## Foto do Instagram
+
+Em **Perfil**, informe o @ e use **Buscar foto do Instagram** para carregar a prévia. A foto
+entra no rascunho quando você salva. Você pode enviar um arquivo ao editar qualquer perfil.
+
+A integração usa o Business Discovery da Meta, que pesquisa contas profissionais. Para ativar
+no Coolify, configure `INSTAGRAM_GRAPH_API_URL` com a origem versionada da Graph API,
+`INSTAGRAM_BUSINESS_ACCOUNT_ID` com o ID da conta profissional vinculada ao app e
+`INSTAGRAM_GRAPH_ACCESS_TOKEN` com o token de acesso autorizado. Consulte as permissões em
+[Business Discovery](https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/).

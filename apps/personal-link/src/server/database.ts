@@ -8,6 +8,8 @@ import {
   publicationTransition,
 } from "./publication.js";
 
+export type EditorAccess = "admin" | Buffer;
+
 type Snapshot = PageContent & { avatarId: string | null; backgroundId: string | null };
 
 type PageRow = {
@@ -17,6 +19,7 @@ type PageRow = {
   slug_locked: boolean;
   draft: Snapshot;
   publication: Snapshot | null;
+  client_link_digest: Buffer | null;
 };
 
 function presentation(snapshot: Snapshot, mediaBase: string): Presentation {
@@ -28,15 +31,23 @@ function presentation(snapshot: Snapshot, mediaBase: string): Presentation {
   };
 }
 
-function adminPage(row: PageRow): AdminPage {
+function editorPage(row: PageRow, access: EditorAccess): AdminPage {
+  const scope = access === "admin" ? "admin" : "client";
   return {
     id: row.id,
     slug: row.slug,
     revision: row.revision,
     published: row.publication !== null,
     slugLocked: row.slug_locked,
-    draft: presentation(row.draft, `/api/admin/pages/${row.id}/media`),
+    ...(scope === "admin" ? { hasClientLink: row.client_link_digest !== null } : {}),
+    draft: presentation(row.draft, `/api/${scope}/pages/${row.id}/media`),
   };
+}
+
+function inaccessiblePage(access: EditorAccess): RequestError {
+  return access === "admin"
+    ? new RequestError(404, "Página não encontrada.")
+    : new RequestError(401, "Este link de edição é inválido ou foi revogado.");
 }
 
 async function updateMedia(
@@ -96,6 +107,13 @@ const migration1 = `
   CREATE INDEX personal_link_session_expiry_idx ON personal_link_session (expires_at);
 `;
 
+const migration2 = `
+  ALTER TABLE personal_link_page
+  ADD COLUMN client_link_digest bytea CHECK (octet_length(client_link_digest) = 32);
+`;
+
+const migrations = [migration1, migration2];
+
 export class Database {
   private readonly pool: Pool;
 
@@ -131,18 +149,20 @@ export class Database {
 
   private async updatePage(
     id: string,
+    access: EditorAccess,
     update: (client: PoolClient, row: PageRow) => Promise<PageRow>,
   ): Promise<AdminPage> {
     return this.transaction(async (client) => {
       const result = await client.query<PageRow>(
-        "SELECT * FROM personal_link_page WHERE id = $1 FOR UPDATE",
-        [id],
+        `SELECT * FROM personal_link_page
+         WHERE id = $1 AND ($2::bytea IS NULL OR client_link_digest = $2) FOR UPDATE`,
+        [id, access === "admin" ? null : access],
       );
       const page = result.rows[0];
-      if (!page) throw new RequestError(404, "Página não encontrada.");
+      if (!page) throw inaccessiblePage(access);
       const next = await update(client, page);
       await pruneMedia(client, next);
-      return adminPage(next);
+      return editorPage(next, access);
     });
   }
 
@@ -152,10 +172,15 @@ export class Database {
       await client.query(
         "CREATE TABLE IF NOT EXISTS personal_link_schema (version integer PRIMARY KEY)",
       );
-      const result = await client.query("SELECT 1 FROM personal_link_schema WHERE version = 1");
-      if (result.rowCount === 0) {
-        await client.query(migration1);
-        await client.query("INSERT INTO personal_link_schema (version) VALUES (1)");
+      const result = await client.query<{ version: number }>(
+        "SELECT version FROM personal_link_schema",
+      );
+      const applied = new Set(result.rows.map(({ version }) => version));
+      for (const [index, sql] of migrations.entries()) {
+        const version = index + 1;
+        if (applied.has(version)) continue;
+        await client.query(sql);
+        await client.query("INSERT INTO personal_link_schema (version) VALUES ($1)", [version]);
       }
     });
   }
@@ -197,7 +222,7 @@ export class Database {
     const result = await this.pool.query<PageRow>(
       "SELECT * FROM personal_link_page ORDER BY updated_at DESC, id",
     );
-    return result.rows.map(adminPage);
+    return result.rows.map((row) => editorPage(row, "admin"));
   }
 
   async createPage(slug: string): Promise<AdminPage> {
@@ -214,15 +239,34 @@ export class Database {
       "INSERT INTO personal_link_page (slug, draft) VALUES ($1, $2) RETURNING *",
       [slug, draft],
     );
-    return adminPage(result.rows[0]);
+    return editorPage(result.rows[0], "admin");
   }
 
-  async getAdminPage(id: string): Promise<AdminPage | null> {
-    const result = await this.pool.query<PageRow>(
-      "SELECT * FROM personal_link_page WHERE id = $1",
-      [id],
+  async setClientLink(id: string, clientDigest: Buffer | null): Promise<void> {
+    const result = await this.pool.query(
+      "UPDATE personal_link_page SET client_link_digest = $2 WHERE id = $1",
+      [id, clientDigest],
     );
-    return result.rows[0] ? adminPage(result.rows[0]) : null;
+    if (result.rowCount !== 1) throw inaccessiblePage("admin");
+  }
+
+  async requireClientAccess(id: string, clientDigest: Buffer): Promise<void> {
+    const result = await this.pool.query(
+      "SELECT 1 FROM personal_link_page WHERE id = $1 AND client_link_digest = $2",
+      [id, clientDigest],
+    );
+    if (result.rowCount !== 1) throw inaccessiblePage(clientDigest);
+  }
+
+  async getEditorPage(id: string, access: EditorAccess): Promise<AdminPage> {
+    const result = await this.pool.query<PageRow>(
+      `SELECT * FROM personal_link_page
+       WHERE id = $1 AND ($2::bytea IS NULL OR client_link_digest = $2)`,
+      [id, access === "admin" ? null : access],
+    );
+    const page = result.rows[0];
+    if (!page) throw inaccessiblePage(access);
+    return editorPage(page, access);
   }
 
   async saveDraft(
@@ -232,8 +276,9 @@ export class Database {
     content: PageContent,
     avatar: Buffer | null | undefined,
     background: Buffer | null | undefined,
+    access: EditorAccess,
   ): Promise<AdminPage> {
-    return this.updatePage(id, async (client, page) => {
+    return this.updatePage(id, access, async (client, page) => {
       assertCurrentRevision(page.revision, revision);
       assertSlugCanChange(page.slug_locked, page.slug, slug);
       const draft: Snapshot = {
@@ -254,8 +299,9 @@ export class Database {
     id: string,
     revision: number,
     action: "publish" | "unpublish",
+    access: EditorAccess,
   ): Promise<AdminPage> {
-    return this.updatePage(id, async (client, page) => {
+    return this.updatePage(id, access, async (client, page) => {
       const next = publicationTransition(
         { ...page, slugLocked: page.slug_locked },
         revision,
@@ -279,10 +325,16 @@ export class Database {
     return publication ? presentation(publication, `/api/public/pages/${slug}/media`) : null;
   }
 
-  async getAdminMedia(pageId: string, mediaId: string): Promise<Buffer | null> {
+  async getEditorMedia(
+    pageId: string,
+    mediaId: string,
+    access: EditorAccess,
+  ): Promise<Buffer | null> {
     const result = await this.pool.query<{ content: Buffer }>(
-      "SELECT content FROM personal_link_media WHERE page_id = $1 AND id = $2",
-      [pageId, mediaId],
+      `SELECT media.content FROM personal_link_media media
+       JOIN personal_link_page page ON page.id = media.page_id
+       WHERE page.id = $1 AND media.id = $2 AND ($3::bytea IS NULL OR page.client_link_digest = $3)`,
+      [pageId, mediaId, access === "admin" ? null : access],
     );
     return result.rows[0]?.content ?? null;
   }
