@@ -91,6 +91,15 @@
   transform: scale(1.06);
 }
 
+.original-link-page[data-theme="light"]:has(> .link-background)::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgb(255 255 255 / 70%);
+  content: "";
+  pointer-events: none;
+}
+
 .original-container {
   width: 100%;
   max-width: 588px;

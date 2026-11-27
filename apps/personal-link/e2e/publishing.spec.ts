@@ -1,9 +1,18 @@
 import { randomUUID } from "node:crypto";
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import sharp from "sharp";
 import type { Presentation } from "../src/shared/contracts.js";
 
 const password = process.env.TEST_ADMIN_PASSWORD ?? "personal-link-e2e-only";
+
+async function backgroundBrightness(page: Page): Promise<number> {
+  const pixel = await page.screenshot({
+    clip: { x: 12, y: 12, width: 1, height: 1 },
+    scale: "css",
+  });
+  const [red] = await sharp(pixel).raw().toBuffer();
+  return red;
+}
 
 test("edits, previews and publishes a shareable page on the visitor's local theme", async ({
   page,
@@ -14,7 +23,7 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   const publicPath = `/${slug}`;
   const apiPath = `/api/public/pages/${slug}`;
   const image = await sharp({
-    create: { width: 80, height: 48, channels: 3, background: "#6f8799" },
+    create: { width: 80, height: 48, channels: 3, background: "#080808" },
   })
     .png()
     .toBuffer();
@@ -59,6 +68,12 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   await expect(page.getByRole("heading", { name: "Editar página" })).toBeFocused();
 
   const preview = page.getByRole("region", { name: "Prévia da página de links" });
+  const lightPreviewSwitch = preview.getByRole("button", { name: "Tema claro" });
+  if (await lightPreviewSwitch.isVisible()) await lightPreviewSwitch.click();
+  await expect(preview).toHaveAttribute("data-theme", "light");
+  const overlay = () =>
+    preview.evaluate((surface) => getComputedStyle(surface, "::after").backgroundColor);
+  expect(await overlay()).toBe("rgba(0, 0, 0, 0)");
   await expect(page.getByRole("radio", { name: "Original" })).toBeChecked();
   await expect(preview).toHaveAttribute("data-preset", "original");
   const placeholder = preview.locator(".original-avatar--placeholder");
@@ -95,6 +110,7 @@ test("edits, previews and publishes a shareable page on the visitor's local them
   const blur = page.getByRole("slider", { name: "Desfoque do fundo" });
   await expect(blur).toBeEnabled();
   await blur.fill("12");
+  await expect.poll(overlay).toBe("rgba(255, 255, 255, 0.7)");
   await page.getByRole("button", { name: "Adicionar link" }).click();
   await page.getByLabel("Título do link 1").fill("Meu site");
   await page.getByLabel("URL do link 1").fill("google.com");
@@ -152,7 +168,11 @@ test("edits, previews and publishes a shareable page on the visitor's local them
       hoursToBoundary: 9,
     },
   ]) {
-    const context = await browser.newContext({ baseURL, timezoneId: visitor.timezoneId });
+    const context = await browser.newContext({
+      baseURL,
+      timezoneId: visitor.timezoneId,
+      viewport: page.viewportSize() ?? undefined,
+    });
     try {
       const publicPage = await context.newPage();
       await publicPage.clock.install({ time: new Date("2026-11-25T12:00:00Z") });
@@ -162,6 +182,11 @@ test("edits, previews and publishes a shareable page on the visitor's local them
       const surface = publicPage.getByRole("main");
       await expect(surface.getByRole("heading", { name: "@atelier-ficticio" })).toBeVisible();
       await expect(surface).toHaveAttribute("data-theme", visitor.initial);
+      if (visitor.initial === "light") {
+        await expect.poll(() => backgroundBrightness(publicPage)).toBeGreaterThan(175);
+      } else {
+        await expect.poll(() => backgroundBrightness(publicPage)).toBeLessThan(20);
+      }
       await expect(surface.locator("img.original-avatar")).toHaveCSS("border-radius", "50%");
       await expect(surface.locator("img.original-avatar")).toHaveCSS("border-top-width", "2px");
       await expect(surface.locator("footer")).toHaveText(
