@@ -1,6 +1,10 @@
 import sharp from "sharp";
 import { expect, it, vi } from "vitest";
-import { createInstagramAvatarLookup, instagramUsername } from "./instagram.js";
+import {
+  createInstagramAvatarLookup,
+  instagramProfileUsername,
+  instagramUsername,
+} from "./instagram.js";
 
 const graph = "https://graph.facebook.com/v27.0";
 const photo = "https://images.cdninstagram.com/avatar.png";
@@ -17,6 +21,25 @@ it("normalizes an Instagram handle and rejects Graph expressions and malformed u
   }
   expect(createInstagramAvatarLookup({})).toBeUndefined();
   expect(() => createInstagramAvatarLookup({ ...env, INSTAGRAM_GRAPH_API_URL: photo })).toThrow();
+});
+
+it("extracts the Instagram handle from copied profile URLs only", () => {
+  expect(instagramProfileUsername(" https://www.instagram.com/Pessoa.Exemplo/?igsh=abc ")).toBe(
+    "pessoa.exemplo",
+  );
+  expect(instagramProfileUsername("instagram.com/pessoa_exemplo")).toBe("pessoa_exemplo");
+  for (const url of [
+    "https://instagram.com/p/EXAMPLE/",
+    "https://instagram.com/reel/EXAMPLE/",
+    "https://instagram.com/stories/pessoa/123",
+    "https://instagram.com/reels/",
+    "https://instagram.com.evil.example/pessoa",
+    "https://login@instagram.com/pessoa",
+    "https://instagram.com/pes%2Fsoa",
+    "https://instagram.com:8443/pessoa",
+  ]) {
+    expect(() => instagramProfileUsername(url)).toThrow(/Instagram/u);
+  }
 });
 
 it("fetches the authorized Graph field and returns an optimized, same-origin preview payload", async () => {

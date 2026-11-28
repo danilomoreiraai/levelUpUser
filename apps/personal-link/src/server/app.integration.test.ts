@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { AdminPage, Presentation } from "../shared/contracts.js";
+import type { AdminPage, Presentation, ShowcaseBatch } from "../shared/contracts.js";
 import { createApp } from "./app.js";
 import { digest, hashPassword } from "./auth.js";
 import { Database } from "./database.js";
@@ -82,7 +82,14 @@ describe.skipIf(!databaseUrl)("Personal Link API with PostgreSQL", () => {
     const page = created.json<AdminPage>();
     const base = `/api/admin/pages/${page.id}`;
     const publicUrl = `/api/public/pages/${slug}`;
+    async function showcaseEntry() {
+      const response = await app.inject(`/api/public/showcase?after=${slug.slice(0, -1)}`);
+      expect(response.statusCode).toBe(200);
+      expect(response.headers["cache-control"]).toContain("no-store");
+      return response.json<ShowcaseBatch>().pages.find((entry) => entry.slug === slug);
+    }
     expect((await app.inject(publicUrl)).statusCode).toBe(404);
+    expect(await showcaseEntry()).toBeUndefined();
 
     const picture = await sharp({
       create: { width: 16, height: 16, channels: 3, background: "#bbccdd" },
@@ -129,6 +136,7 @@ describe.skipIf(!databaseUrl)("Personal Link API with PostgreSQL", () => {
       avatarUrl: proposedPublicMedia,
     });
     expect((await app.inject(proposedPublicMedia)).headers["content-type"]).toBe("image/webp");
+    expect(await showcaseEntry()).toEqual({ ...firstPublic.json<Presentation>(), slug });
 
     const revision = publish.json<AdminPage>().revision;
     const changedSlug = await app.inject({
@@ -152,6 +160,7 @@ describe.skipIf(!databaseUrl)("Personal Link API with PostgreSQL", () => {
     const latest = writes.find(({ statusCode }) => statusCode === 200)?.json<AdminPage>();
     expect((await app.inject(publicUrl)).json<Presentation>().handle).toBe("primeira");
     expect((await app.inject(proposedPublicMedia)).statusCode).toBe(200);
+    expect(await showcaseEntry()).toEqual({ ...firstPublic.json<Presentation>(), slug });
 
     const updated = await app.inject({
       method: "POST",
@@ -162,6 +171,7 @@ describe.skipIf(!databaseUrl)("Personal Link API with PostgreSQL", () => {
     expect(updated.statusCode).toBe(200);
     expect((await app.inject(publicUrl)).json<Presentation>().handle).toBe(latest?.draft.handle);
     expect((await app.inject(proposedPublicMedia)).statusCode).toBe(404);
+    expect(await showcaseEntry()).toMatchObject({ handle: latest?.draft.handle, avatarUrl: null });
 
     const unpublish = await app.inject({
       method: "POST",
@@ -172,6 +182,35 @@ describe.skipIf(!databaseUrl)("Personal Link API with PostgreSQL", () => {
     expect(unpublish.json<AdminPage>()).toMatchObject({ slug, slugLocked: true, published: false });
     expect((await app.inject(publicUrl)).statusCode).toBe(404);
     expect((await app.inject(proposedPublicMedia)).statusCode).toBe(404);
+    expect(await showcaseEntry()).toBeUndefined();
+  });
+
+  it("paginates published clients in slug order and validates the cursor", async () => {
+    const prefix = `zzzz-showcase-${randomUUID().slice(0, 8)}`;
+    const slugs = Array.from(
+      { length: 13 },
+      (_, index) => `${prefix}-${String(index).padStart(2, "0")}`,
+    );
+    const published: AdminPage[] = [];
+    try {
+      for (const slug of slugs) {
+        const created = await db.createPage(slug);
+        published.push(
+          await db.changePublication(created.id, created.revision, "publish", "admin"),
+        );
+      }
+      const first = await app.inject(`/api/public/showcase?after=${prefix}`);
+      expect(first.statusCode).toBe(200);
+      const { pages, nextCursor } = first.json<ShowcaseBatch>();
+      expect(pages.map((entry) => entry.slug)).toEqual(slugs.slice(0, 12));
+      expect(nextCursor).toBe(slugs[11]);
+      const second = await app.inject(`/api/public/showcase?after=${nextCursor}`);
+      expect(second.json<ShowcaseBatch>().pages[0]?.slug).toBe(slugs[12]);
+      expect((await app.inject("/api/public/showcase?after=../admin")).statusCode).toBe(400);
+    } finally {
+      for (const page of published)
+        await db.changePublication(page.id, page.revision, "unpublish", "admin");
+    }
   });
 
   it("grants login-free editing for one page and invalidates its links and sessions", async () => {
@@ -247,18 +286,21 @@ describe.skipIf(!databaseUrl)("Personal Link API with PostgreSQL", () => {
     expect((await issue("POST", clientCookie)).statusCode).toBe(401);
     expect((await issue("DELETE", clientCookie)).statusCode).toBe(401);
 
-    const lookup = (url: string, handle: string) =>
+    const lookup = (url: string, source: { handle: string } | { profileUrl: string }) =>
       app.inject({
         method: "POST",
         url: `${url}/instagram-avatar`,
         headers,
-        payload: { handle },
+        payload: source,
       });
-    const imported = await lookup(base, "@Pessoa.Exemplo");
+    const imported = await lookup(base, {
+      profileUrl: "https://www.instagram.com/Pessoa.Exemplo/?igsh=test",
+    });
     expect(imported.statusCode).toBe(200);
     expect(imported.json()).toEqual({ image: "synthetic-image-for-pessoa.exemplo" });
-    expect((await lookup(base, "@invalido!")).statusCode).toBe(400);
-    expect((await lookup(otherBase, "@pessoa.exemplo")).statusCode).toBe(401);
+    expect((await lookup(base, { handle: "@Pessoa.Exemplo" })).json()).toEqual(imported.json());
+    expect((await lookup(base, { profileUrl: "https://example.com/pessoa" })).statusCode).toBe(400);
+    expect((await lookup(otherBase, { handle: "@pessoa.exemplo" })).statusCode).toBe(401);
 
     const picture = await sharp({
       create: { width: 16, height: 16, channels: 3, background: "#446688" },

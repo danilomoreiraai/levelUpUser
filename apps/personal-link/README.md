@@ -3,6 +3,8 @@
 O painel em `/admin` administra várias páginas com uma conta. Visitantes abrem a versão publicada
 pelo endereço `/<slug>`. A separação entre rascunho e publicação também vale para as imagens. A
 composição da página pública segue o [modelo julianaLinktree](https://github.com/danilomoreiraai/julianaLinktree).
+A vitrine antes do login é alimentada pelas versões publicadas das páginas e carrega os
+clientes em lotes. Retirar uma página do ar a remove da vitrine.
 
 ## Edição com o cliente
 
@@ -91,8 +93,9 @@ dados necessária.
 
 ## Foto do Instagram
 
-Em **Perfil**, informe o @ e use **Buscar foto do Instagram** para carregar a prévia. A foto
-entra no rascunho quando você salva. Você pode enviar um arquivo ao editar qualquer perfil.
+Em **Perfil**, cole o link do perfil ou informe o @ e use **Buscar foto do Instagram** para
+carregar a prévia. A foto entra no rascunho quando você salva. Você também pode enviar um arquivo
+ao editar qualquer perfil.
 
 A integração usa o Business Discovery da Meta, que pesquisa contas profissionais. Para ativar
 no Coolify, configure `INSTAGRAM_GRAPH_API_URL` com a origem versionada da Graph API,

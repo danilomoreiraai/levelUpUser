@@ -1,5 +1,5 @@
 import { Pool, type PoolClient } from "pg";
-import type { AdminPage, PageContent, Presentation } from "../shared/contracts.js";
+import type { AdminPage, PageContent, Presentation, ShowcaseBatch } from "../shared/contracts.js";
 import { digest, sessionDurationSeconds } from "./auth.js";
 import { RequestError } from "./errors.js";
 import {
@@ -323,6 +323,25 @@ export class Database {
     );
     const publication = result.rows[0]?.publication;
     return publication ? presentation(publication, `/api/public/pages/${slug}/media`) : null;
+  }
+
+  async listPublishedPages(after: string | null): Promise<ShowcaseBatch> {
+    const pageSize = 12;
+    const result = await this.pool.query<{ slug: string; publication: Snapshot }>(
+      `SELECT slug, publication FROM personal_link_page
+       WHERE publication IS NOT NULL AND ($1::text IS NULL OR slug > $1)
+       ORDER BY slug LIMIT $2`,
+      [after, pageSize + 1],
+    );
+    const pages = result.rows.slice(0, pageSize).map(({ slug, publication }) => ({
+      slug,
+      ...presentation(publication, `/api/public/pages/${slug}/media`),
+    }));
+    const lastPage = pages.at(-1);
+    return {
+      pages,
+      nextCursor: result.rows.length > pageSize && lastPage ? lastPage.slug : null,
+    };
   }
 
   async getEditorMedia(
