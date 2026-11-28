@@ -308,3 +308,44 @@ test("shares single-page editing without granting administrator access", async (
     await client.close();
   }
 });
+
+test("imports a photo using an Instagram profile link without changing the displayed handle", async ({
+  page,
+}) => {
+  const slug = `instagram-${randomUUID().slice(0, 8)}`;
+  const profileUrl = "https://www.instagram.com/pessoa.exemplo/?igsh=sample";
+  const photo = await sharp({
+    create: { width: 40, height: 40, channels: 3, background: "#123456" },
+  })
+    .webp()
+    .toBuffer();
+  const image = `data:image/webp;base64,${photo.toString("base64")}`;
+  await page.route("**/api/admin/pages/*", async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({
+      response,
+      json: { ...(await response.json()), instagramLookupAvailable: true },
+    });
+  });
+  await page.route("**/api/admin/pages/*/instagram-avatar", async (route) => {
+    expect(route.request().postDataJSON()).toEqual({ profileUrl });
+    await route.fulfill({ json: { image } });
+  });
+
+  await page.goto("/admin");
+  await page.getByLabel("Senha do painel").fill(password);
+  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByLabel("Endereço da página").fill(slug);
+  await page.getByRole("button", { name: "Criar página" }).click();
+  await page.getByLabel("Nome de usuário (@)").fill("@meu-projeto");
+  await page.getByLabel("Link do perfil no Instagram").fill(profileUrl);
+  await page.getByRole("button", { name: "Buscar foto do Instagram" }).click();
+
+  const preview = page.getByRole("region", { name: "Prévia da página de links" });
+  const portrait = preview.locator("img.original-avatar");
+  await expect(portrait).toHaveAttribute("src", image);
+  await expect(preview.getByRole("heading", { name: "@meu-projeto" })).toBeVisible();
+  await page.getByRole("button", { name: "Salvar rascunho" }).click();
+  await expect(portrait).toHaveAttribute("src", /\/api\/admin\/pages\/.*\/media\//u);
+  await expect(page.getByLabel("Nome de usuário (@)")).toHaveValue("meu-projeto");
+});

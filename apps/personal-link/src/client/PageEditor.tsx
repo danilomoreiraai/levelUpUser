@@ -273,6 +273,7 @@ export function PageEditor({
   const [conflict, setConflict] = useState(false);
   const [notice, setNotice] = useState("");
   const [copyNotice, setCopyNotice] = useState("");
+  const [instagramProfile, setInstagramProfile] = useState("");
   const heading = useRef<HTMLHeadingElement>(null);
   const instagramHintId = useId();
   const nextId = useRef(maxLinks + maxSocials);
@@ -353,7 +354,9 @@ export function PageEditor({
   async function selectInstagramPortrait() {
     setUploadState("avatar", { busy: true, problem: "" });
     try {
-      const image = await importInstagramAvatar(page.id, draft.handle, scope);
+      const profileUrl = instagramProfile.trim();
+      const source = profileUrl ? { profileUrl } : { handle: draft.handle };
+      const image = await importInstagramAvatar(page.id, source, scope);
       setImage("avatar", image);
     } catch (error) {
       if (onAccessError(error)) return;
@@ -499,6 +502,20 @@ export function PageEditor({
                 state={uploads.avatar}
                 url={draft.avatarUrl}
               />
+              <label className="field">
+                <span>Link do perfil no Instagram</span>
+                <input
+                  autoCapitalize="none"
+                  disabled={uploads.avatar.busy}
+                  inputMode="url"
+                  maxLength={1_024}
+                  onChange={(event) => setInstagramProfile(event.currentTarget.value)}
+                  placeholder="https://www.instagram.com/seuperfil/"
+                  spellCheck={false}
+                  type="text"
+                  value={instagramProfile}
+                />
+              </label>
               <button
                 aria-describedby={
                   initialPage.instagramLookupAvailable ? undefined : instagramHintId
@@ -507,7 +524,7 @@ export function PageEditor({
                 disabled={
                   !initialPage.instagramLookupAvailable ||
                   uploads.avatar.busy ||
-                  !draft.handle.trim()
+                  (!instagramProfile.trim() && !draft.handle.trim())
                 }
                 type="button"
                 onClick={() => void selectInstagramPortrait()}

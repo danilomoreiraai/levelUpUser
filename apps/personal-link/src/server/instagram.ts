@@ -1,3 +1,4 @@
+import { normalizeLinkUrl } from "../shared/normalizeLinkUrl.js";
 import { RequestError } from "./errors.js";
 import { readImage } from "./images.js";
 
@@ -5,6 +6,18 @@ const maxPhotoBytes = 5 * 1024 * 1024;
 const unavailable =
   "Não foi possível buscar a foto do Instagram agora. Você pode enviar uma imagem.";
 const missing = "Foto indisponível para este @. A busca atende contas profissionais do Instagram.";
+const profileHosts = new Set(["instagram.com", "www.instagram.com", "m.instagram.com"]);
+const nonProfilePaths = new Set([
+  "accounts",
+  "direct",
+  "explore",
+  "p",
+  "reel",
+  "reels",
+  "share",
+  "stories",
+  "tv",
+]);
 
 export function instagramUsername(value: unknown): string {
   const username = typeof value === "string" ? value.trim().replace(/^@/u, "").toLowerCase() : "";
@@ -12,6 +25,22 @@ export function instagramUsername(value: unknown): string {
     throw new RequestError(400, "Informe um @ válido do Instagram.");
   }
   return username;
+}
+
+export function instagramProfileUsername(value: unknown): string {
+  const address = typeof value === "string" ? normalizeLinkUrl(value) : null;
+  const url = address ? new URL(address) : null;
+  const handle = url && /^\/([\w.]+)\/?$/u.exec(url.pathname)?.[1]?.toLowerCase();
+  if (
+    !url ||
+    !handle ||
+    !profileHosts.has(url.hostname) ||
+    url.port ||
+    nonProfilePaths.has(handle)
+  ) {
+    throw new RequestError(400, "Informe o link de um perfil do Instagram.");
+  }
+  return instagramUsername(handle);
 }
 
 function photoUrl(value: unknown): URL {

@@ -1,4 +1,12 @@
-import { type FormEvent, type MouseEvent, useCallback, useEffect, useState } from "react";
+import {
+  type FormEvent,
+  lazy,
+  type MouseEvent,
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import type { AdminPage } from "../shared/contracts";
 import {
@@ -16,6 +24,10 @@ import { formatHandle } from "./presentation";
 
 type AdminErrorHandler = (error: unknown) => boolean;
 type EditingState = { busy: boolean; dirty: boolean };
+
+const ClientShowcase = lazy(() =>
+  import("./ClientShowcase").then((module) => ({ default: module.ClientShowcase })),
+);
 
 const portfolioNavigation = [
   { label: "Home", path: "/" },
@@ -398,7 +410,14 @@ export function AdminApp() {
           </div>
         )}
         {session === "loading" && !problem && <AdminLoading label="Abrindo o painel…" />}
-        {session === "denied" && <Login onAuthorized={() => setSession("active")} />}
+        {session === "denied" && (
+          <>
+            <Login onAuthorized={() => setSession("active")} />
+            <Suspense fallback={<AdminLoading label="Carregando vitrine…" />}>
+              <ClientShowcase />
+            </Suspense>
+          </>
+        )}
         {session === "active" && (
           <PageWorkspace onAdminError={onAdminError} onEditingChange={setEditing} />
         )}

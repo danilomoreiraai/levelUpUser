@@ -54,11 +54,15 @@ function identifyRows<T>(items: T[], describe: (item: T) => string[]) {
 }
 
 export function LinkPage({
+  deferImages = false,
   presentation,
   preview = false,
+  previewLabel = "Prévia da página de links",
 }: {
+  deferImages?: boolean;
   presentation: Presentation;
   preview?: boolean;
+  previewLabel?: string;
 }) {
   const { theme: autoTheme, year } = useLocalAppearance();
   const [override, setOverride] = useState<LocalTheme | null>(null);
@@ -76,7 +80,7 @@ export function LinkPage({
       className={`original-link-page${preview ? " original-link-page--preview" : ""}`}
       data-theme={theme}
       data-preset={presentation.preset}
-      aria-label={preview ? "Prévia da página de links" : undefined}
+      aria-label={preview ? previewLabel : undefined}
     >
       {presentation.backgroundUrl ? (
         <img
@@ -86,6 +90,7 @@ export function LinkPage({
           alt=""
           aria-hidden="true"
           fetchPriority={preview ? "low" : undefined}
+          loading={deferImages ? "lazy" : undefined}
           style={backgroundStyle}
         />
       ) : (
@@ -106,6 +111,7 @@ export function LinkPage({
             src={artwork.mobile}
             alt=""
             fetchPriority={preview ? "low" : undefined}
+            loading={deferImages ? "lazy" : undefined}
             style={backgroundStyle}
           />
         </picture>
@@ -113,7 +119,14 @@ export function LinkPage({
       <div className="original-container">
         <div className="original-profile">
           {avatar ? (
-            <img className="original-avatar" src={avatar} alt="" width={112} height={112} />
+            <img
+              className="original-avatar"
+              src={avatar}
+              alt=""
+              width={112}
+              height={112}
+              loading={deferImages ? "lazy" : undefined}
+            />
           ) : (
             <span className="original-avatar original-avatar--placeholder" aria-hidden="true" />
           )}

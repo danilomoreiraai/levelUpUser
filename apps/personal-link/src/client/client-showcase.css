@@ -1,0 +1,111 @@
+.client-showcase {
+  display: grid;
+  min-width: 0;
+  gap: 1.25rem;
+  padding-block-start: 1.5rem;
+  border-top: 1px solid var(--edge);
+}
+
+.client-showcase > h2 {
+  font-size: clamp(1.375rem, 3vw, 1.875rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.showcase-placeholder {
+  width: min(100%, 28rem);
+  min-height: 10rem;
+}
+
+.showcase-carousel {
+  display: grid;
+  min-width: 0;
+  gap: 0.5rem;
+  width: min(100%, 28rem);
+}
+
+.showcase-carousel-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.showcase-thumbnail {
+  position: relative;
+  display: flex;
+  isolation: isolate;
+  min-height: 9rem;
+  align-items: end;
+  overflow: hidden;
+  padding: 1rem;
+  border-radius: 0.875rem;
+  background: #271e33;
+  color: white;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.showcase-thumbnail-background,
+.showcase-thumbnail::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.showcase-thumbnail-background {
+  object-fit: cover;
+  transform: scale(1.15);
+}
+
+.showcase-thumbnail::after {
+  background: linear-gradient(transparent 10%, rgb(0 0 0 / 80%));
+  content: "";
+}
+
+.showcase-thumbnail-profile {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.625rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.showcase-thumbnail-profile img {
+  flex: none;
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.showcase-position {
+  margin-block-start: 0.3rem;
+}
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  align-items: start;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.showcase-card {
+  display: grid;
+  min-width: 0;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--edge);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.showcase-card .original-link-page {
+  --original-top-space: 1rem;
+  border-radius: 0.7rem;
+}

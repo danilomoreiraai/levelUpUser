@@ -7,7 +7,7 @@ import { digest, newSessionToken, readPasswordHash, sessionDurationSeconds } fro
 import type { Database, EditorAccess } from "./database.js";
 import { RequestError } from "./errors.js";
 import { readImage } from "./images.js";
-import { instagramUsername } from "./instagram.js";
+import { instagramProfileUsername, instagramUsername } from "./instagram.js";
 import { object, readContent, readRevision, readSlug, validSlug } from "./validation.js";
 
 type Options = {
@@ -244,7 +244,7 @@ export async function createApp(options: Options) {
     }));
     app.post<{ Params: PageParams }>(
       `${base}/instagram-avatar`,
-      { onRequest, bodyLimit: 512 },
+      { onRequest, bodyLimit: 8_192 },
       async (request) => {
         if (scope === "admin") await database.getEditorPage(readId(request.params.id), "admin");
         if (!options.instagramAvatar) {
@@ -253,7 +253,11 @@ export async function createApp(options: Options) {
             "A busca do Instagram ainda precisa ser ativada. Você pode enviar uma foto.",
           );
         }
-        const username = instagramUsername(object(request.body).handle);
+        const { handle, profileUrl } = object(request.body);
+        const username =
+          profileUrl === undefined
+            ? instagramUsername(handle)
+            : instagramProfileUsername(profileUrl);
         return { image: await options.instagramAvatar(username) };
       },
     );
@@ -297,6 +301,14 @@ export async function createApp(options: Options) {
   }
   registerEditorRoutes("admin");
   registerEditorRoutes("client");
+
+  app.get<{ Querystring: { after?: string } }>("/api/public/showcase", async (request) => {
+    const { after } = request.query;
+    if (after !== undefined && (typeof after !== "string" || !validSlug(after))) {
+      throw new RequestError(400, "Endereço de paginação inválido.");
+    }
+    return database.listPublishedPages(after ?? null);
+  });
 
   app.get<{ Params: { slug: string } }>("/api/public/pages/:slug", async (request) => {
     const page = await database.getPublicPage(publicSlug(request.params.slug));

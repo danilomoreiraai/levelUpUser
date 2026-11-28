@@ -1,4 +1,4 @@
-import type { AdminPage, Presentation } from "../shared/contracts";
+import type { AdminPage, Presentation, ShowcaseBatch } from "../shared/contracts";
 
 export type DraftRequest = Omit<Presentation, "avatarUrl" | "backgroundUrl"> & {
   revision: number;
@@ -116,19 +116,24 @@ export async function openClientSession(
 
 export async function importInstagramAvatar(
   id: string,
-  handle: string,
+  source: { handle: string } | { profileUrl: string },
   scope: EditorScope,
 ): Promise<string> {
-  const response = await request(
-    `${pagePath(id, scope)}/instagram-avatar`,
-    json("POST", { handle }),
-  );
+  const response = await request(`${pagePath(id, scope)}/instagram-avatar`, json("POST", source));
   const { image } = (await response.json()) as { image: string };
   return image;
 }
 
 export function loadPublicPage(slug: string, signal: AbortSignal): Promise<Presentation> {
   return read(`/api/public/pages/${encodeURIComponent(slug)}`, signal);
+}
+
+export function loadShowcase(
+  after: string | undefined,
+  signal: AbortSignal,
+): Promise<ShowcaseBatch> {
+  const query = after ? `?after=${encodeURIComponent(after)}` : "";
+  return read(`/api/public/showcase${query}`, signal);
 }
 
 export function getPublicUrl(slug: string): string {
