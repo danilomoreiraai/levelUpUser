@@ -1,0 +1,122 @@
+{
+  "commit": "5bae431deae12e590f22cc74b2f90c271650d1d5",
+  "commits": 31,
+  "shallow": "false",
+  "text_blobs": 193,
+  "candidates": [
+    {
+      "object": "30276040200d9e4088a2dc7a6473bcf858e7c672",
+      "file": ".github/workflows/deploy.yml",
+      "line": 49,
+      "rule": "shell-default",
+      "fingerprint": "f4a4741d4205"
+    },
+    {
+      "object": "7cc540931e728a81c43f73f889c750ec325938f7",
+      "file": "package.json",
+      "line": 14,
+      "rule": "shell-default",
+      "fingerprint": "d0d3f004bd0b"
+    },
+    {
+      "object": "413729207233f33b18093123df2afdc9e52f07e8",
+      "file": "package.json",
+      "line": 13,
+      "rule": "shell-default",
+      "fingerprint": "d0d3f004bd0b"
+    },
+    {
+      "object": "b76dcd27a92b73fc5d38d16077f687fc83ee3554",
+      "file": "package.json",
+      "line": 13,
+      "rule": "shell-default",
+      "fingerprint": "d0d3f004bd0b"
+    },
+    {
+      "object": "87ffe7b237151738e648aea8bc7665fa4e9e715e",
+      "file": "package.json",
+      "line": 13,
+      "rule": "shell-default",
+      "fingerprint": "d0d3f004bd0b"
+    },
+    {
+      "object": "60393e5b20e9c9e672e227e118f618b7063ec042",
+      "file": "package.json",
+      "line": 13,
+      "rule": "shell-default",
+      "fingerprint": "d0d3f004bd0b"
+    }
+  ],
+  "bundle": [
+    {
+      "file": "dist/index.html",
+      "sha256": "0dc42c65357cb5d9e2fdd2d1a7316912d179f05cf10ceffd5314bd267d7afd87",
+      "rules": []
+    },
+    {
+      "file": "dist/release.json",
+      "sha256": "ef4fb3f73458f4e6123079feea0b6ae76788b95159dcb5a1cc83ec62d6cc3979",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/ProjectsPage-DC4h7wOU.js",
+      "sha256": "668e5396ea9810e456f255aaeaaeacfbcf4b19691757253ac927f219d40fb90f",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/index-CWxMhVs9.css",
+      "sha256": "dae12e207e568e227ba20cb8dfbb17866f2c1e272e0a59ecdae7130c043f3f03",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/liquidGL-80haAdQ5.js",
+      "sha256": "cdb9db8b36076fe3750d5de1e933b1acdc8f283f3e68aa9c5fe036c2c329ec0e",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/NotFoundPage-B8b-xNng.js",
+      "sha256": "1e77980d0199aba31db91c5323059b5b12719a44d475c77c948b7c981e4afdd1",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/404.html",
+      "sha256": "4f2a40b17c41d7d68c1debc193fde1b42181c021f5f17caab6288100955d7eb3",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/pageMetadata-_re-qm2n.js",
+      "sha256": "3d8a6ecc1fb1cc17349bd2146c9bc28a8efc3df13b43cb01364f9dc391342fb9",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/index-CGu8Clg4.js",
+      "sha256": "e597e1f4f440a3096403611520158d8e09f84f53c66f688cb8d0220976b8d59f",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/ServicesPage-DdYnJt-9.js",
+      "sha256": "bc8c29034dd8dea315f07acb6268d7f908ab4058457660f71e0ca2a8bcd0d145",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/HomePage-BkSRAdY4.js",
+      "sha256": "977b77e21d0e92000d49fa97087d734e868a61eb3b4b4fc0644c94e4f957cf2d",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/PrivacyPage-AeDEm8lR.js",
+      "sha256": "9db01c61c5e00cc7529340d98c7c573370d3e7a307beca001c086b82e97d2b07",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/TermsPage-F71M4_nS.js",
+      "sha256": "9bd8ea553a87c5c9e63c498d04ea56541275782e1605644bec9744a5e695718e",
+      "rules": []
+    },
+    {
+      "file": "dist/assets/web-vitals-CLs7hPwd.js",
+      "sha256": "86ad4b9fad7f73d6c2255495d9507a77cfa52651c277f6867965a1acbc922c46",
+      "rules": []
+    }
+  ]
+}
